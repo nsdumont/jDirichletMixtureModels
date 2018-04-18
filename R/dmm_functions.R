@@ -110,10 +110,10 @@ dmm.model.character <- function(...){
   
 }
 
-#' Including a user given file of Julia functions 
+#' Add a Julia file to be accessible. 
 #' @param filename The name of the Julia file
-.add_file <- function(filename){
-  julia_command(paste("include(",filename,")"))
+add_file <- function(filename){
+  .dmm$julia$command(paste("include(",filename,")"))
 }
 
 #' Constructing RModel object: a model based on user specifed R function
@@ -158,19 +158,19 @@ dmm.cluster <- function(model, data, alpha=1.0, iters=5000, burnin=200, shuffle=
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #' If using a user specifed model via R functions.
 dmm.cluster.RModel <- function(model, data, alpha=1.0, iters=5000, burnin=200, shuffle=TRUE){
-  julia$assign("pdf_func", JuliaObject(model$pdf_likelihood))
-  julia$assign("sample_func", JuliaObject(model$sample_posterior))
-  julia$assign("marg_func", JuliaObject(model$marginal_likelihood))
-  julia$assign("params", JuliaObject(model$params))
+  .dmm$julia$assign("pdf_func", JuliaObject(model$pdf_likelihood))
+  .dmm$julia$assign("sample_func", JuliaObject(model$sample_posterior))
+  .dmm$julia$assign("marg_func", JuliaObject(model$marginal_likelihood))
+  .dmm$julia$assign("params", JuliaObject(model$params))
   if (model$univariate == TRUE) {
-    julia$command("rmodel=GeneralUnivariateConjugateModel(pdf_func,sample_func,marg_func,params)")
+    .dmm$julia$command("rmodel=GeneralUnivariateConjugateModel(pdf_func,sample_func,marg_func,params)")
   }else{
-    julia$command("rmodel=GeneralMultivariateConjugateModel(pdf_func,sample_func,marg_func,params)")
+    .dmm$julia$command("rmodel=GeneralMultivariateConjugateModel(pdf_func,sample_func,marg_func,params)")
   }
-  julia$assign("Y", data)
-  julia$assign("alpha", alpha)
-  julia$assign("iters", iters)
-  julia$assign("shuffle", shuffle)
+  .dmm$julia$assign("Y", data)
+  .dmm$julia$assign("alpha", alpha)
+  .dmm$julia$assign("iters", iters)
+  .dmm$julia$assign("shuffle", shuffle)
   dmmstates <- julia$eval("dp_cluster(Y, rmodel, alpha, iters, shuffle)")
   return(dmmstates)
 }
@@ -178,35 +178,35 @@ dmm.cluster.RModel <- function(model, data, alpha=1.0, iters=5000, burnin=200, s
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #'If using a user specifed model via Julia functions.
 dmm.cluster.JModel <- function(model, data, alpha=1.0, iters=5000, burnin=200, shuffle=TRUE){
-  julia$assign("pdf_func", model$pdf_name)
-  julia$assign("sample_func", model$sample_name)
-  julia$assign("marg_func", model$marginal_name)
-  julia$assign("params", JuliaObject(model$params))
+  .dmm$julia$assign("pdf_func", model$pdf_name)
+  .dmm$julia$assign("sample_func", model$sample_name)
+  .dmm$julia$assign("marg_func", model$marginal_name)
+  .dmm$julia$assign("params", JuliaObject(model$params))
   if (model$univariate == TRUE) {
-    julia$command("rmodel=GeneralUnivariateConjugateModel(pdf_func,sample_func,marg_func,params)")
+    .dmm$julia$command("rmodel=GeneralUnivariateConjugateModel(pdf_func,sample_func,marg_func,params)")
   }else{
-    julia$command("rmodel=GeneralMultivariateConjugateModel(pdf_func,sample_func,marg_func,params)")
+    .dmm$julia$command("rmodel=GeneralMultivariateConjugateModel(pdf_func,sample_func,marg_func,params)")
   }
-  julia$assign("Y", data)
-  julia$assign("alpha", alpha)
-  julia$assign("iters", iters)
-  julia$assign("shuffle", shuffle)
-  dmmstates <- julia$eval("dp_cluster(Y, rmodel, alpha, iters, shuffle)")
+  .dmm$julia$assign("Y", data)
+  .dmm$julia$assign("alpha", alpha)
+  .dmm$julia$assign("iters", iters)
+  .dmm$julia$assign("shuffle", shuffle)
+  dmmstates <- .dmm$julia$eval("dp_cluster(Y, rmodel, alpha, iters, shuffle)")
   return(dmmstates)
 }
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #' If using one of the avaible bulit-in models.
 dmm.cluster.BaseModel <- function(model, data, alpha=1.0, iters=5000, burnin=200, shuffle=TRUE){
-  julia$assign("params", model$params)
+  .dmm$julia$assign("params", model$params)
   strcommand <- paste0("basemodel=",model$model_type,"(params)")
-  julia$command(strcommand)
+  .dmm$julia$command(strcommand)
   
-  julia$assign("Y", data)
-  julia$assign("alpha", alpha)
-  julia$assign("iters", iters)
-  julia$assign("shuffle", shuffle)
-  dmmstates <- julia$eval("dp_cluster(Y, basemodel, alpha, iters, shuffle)")
+  .dmm$julia$assign("Y", data)
+  .dmm$julia$assign("alpha", alpha)
+  .dmm$julia$assign("iters", iters)
+  .dmm$julia$assign("shuffle", shuffle)
+  dmmstates <- .dmm$julia$eval("dp_cluster(Y, basemodel, alpha, iters, shuffle)")
   return(dmmstates)
 }
 
