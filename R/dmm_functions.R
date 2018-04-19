@@ -17,7 +17,13 @@
 #'
 #' @export
 dmm.setup <- function(...) {
-  .dmm$julia <- JuliaCall::julia_setup(...)
+  # If user did not pass in julia path, try usually macOSx Julia path, if that doesn't work give error
+  arguments <- list(...)
+  if (length(arguments) != 0){
+    .dmm$julia <- JuliaCall::julia_setup(...)
+  } else {
+    .dmm$julia <- JuliaCall::julia_setup("/Applications/Julia-0.6.app/Contents/Resources/julia/bin/")
+  }
   .dmm$julia$install_package_if_needed("DirichletMixtureModels") 
   .dmm$julia$library("DirichletMixtureModels") 
   .dmm$julia$command("using DirichletMixtureModels")
@@ -176,9 +182,9 @@ dmm.cluster.RModel <- function(model, data, alpha=1.0, m_prior=3, m_post=3, iter
   .dmm$julia$assign("params", JuliaObject(model$params))
   
   if (model$isconjugate){
-    .dmm$julia$command("rmodel=GeneralConjugateModel(pdf_func,sample_func,marg_func,params)")
+    .dmm$julia$command("rmodel=GeneralConjugateModel(pdf_func,sample_func,marg_func,params);")
   } else {
-    .dmm$julia$command("rmodel=GeneralNonConjugateModel(pdf_func,sample_func,marg_func,params)")
+    .dmm$julia$command("rmodel=GeneralNonConjugateModel(pdf_func,sample_func,marg_func,params);")
   }
   # Converting all inputs to julia objects
   .dmm$julia$assign("Y", data)
@@ -211,9 +217,9 @@ dmm.cluster.JModel <- function(model, data, alpha=1.0, m_prior=3, m_post=3, iter
   .dmm$julia$assign("marg_func", model$marginal_name)
   .dmm$julia$assign("params", JuliaObject(model$params))
   if (model$isconjugate == TRUE) {
-    .dmm$julia$command("jmodel=GeneralConjugateModel(pdf_func,sample_func,marg_func,params)")
+    .dmm$julia$command("jmodel=GeneralConjugateModel(pdf_func,sample_func,marg_func,params);")
   }else{
-    .dmm$julia$command("jmodel=GeneralNonConjugateModel(pdf_func,sample_func,marg_func,params)")
+    .dmm$julia$command("jmodel=GeneralNonConjugateModel(pdf_func,sample_func,marg_func,params);")
   }
   # Converting all inputs to julia objects
   .dmm$julia$assign("Y", data)
@@ -243,12 +249,12 @@ dmm.cluster.BaseModel <- function(model, data, alpha=1.0, iters=5000, burnin=200
   # Create julia model object given name
   # Case: model without params, ie using default parameters
   if (is.null(model$params)){
-    strcommand <- paste0("basemodel=",model$model_type,"Model()")
+    strcommand <- paste0("basemodel=",model$model_type,"Model();")
   }
   # Case: model with params, ie using user defined parameters
   else {
     .dmm$julia$assign("params", model$params)
-    strcommand <- paste0("basemodel=",model$model_type,"Model(params)")
+    strcommand <- paste0("basemodel=",model$model_type,"Model(params);")
   }
   .dmm$julia$command(strcommand)
   # Converting all inputs to julia objects
