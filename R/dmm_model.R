@@ -153,18 +153,29 @@ dmm.addfile <- function(filename){
 #'                  "MultivariateNormalModel" is the default.
 #' @param params A list of the hyperparameter values for the likelihood functions. Many model have default \code{params} values and thus can be made without passing any \code{params}.
 #'               See documentation for what parameters a given model may take.
+#' @param data In lieu of explicit hyperparameter values, some models can infer good hyperparameter values from given data.
+#'               This option is supported for MultivariateNormalModel and UnivariateNormalModel, as well as UnivariateNormalKnownSigma.
+
 #'
 #' @details Bulit-in models avaible are:
 #'                        "MultivariateNormalModel" (default),
 #'                        "UnivariateNormalModel",
-#'                        "UnivariateNormalKnowSigma",
+#'                        "UnivariateNormalKnownSigma",
 #'                        "UnivariateExponentialModel".
 #'
 #' @return A model object of type BaseModel which can be passed to \code{dmm.cluster}.
 #'
 #' @export
-dmm.BaseModel <- function(typename = "MultivariateNormalModel", params=NULL){
-  model <- list(model_type=typename, params = params)
+dmm.BaseModel <- function(typename = "MultivariateNormalModel", params=NULL, data=NULL){
+  if (!is.null(data)){
+    if(!(typename=="MultivariateNormalModel" || typename=="UnivariateNormalModel" || typename=="UniivariateNormalKnownSigma")){
+      stop("Error: this option is only supported for the MultivariateNormalModel, UnivariateNormalModel and UnivariateNormalKnownSigma")
+    }
+  }
+  if (!is.null(params) & !is.null(data)){
+    stop("Error: Provide either hyperparameters or a dataset, not both")
+  }
+  model <- list(model_type=typename, params=params, data=data)
   attr(model, "class") <- "BaseModel"
   return(model)
 }
