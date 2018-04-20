@@ -417,12 +417,33 @@ dmm.state <- function(juliastate,paramnames){
   clusterinfo=list()
   nclusters=length(juliastate[2])
   for(i in 1:nclusters){
-    params=juliastate[2][i]
+    ptemp=juliastate[2][i]
+    params=list()
+    for(j in 1:length(ptemp)){
+      params[[j]]=ptemp[j]
+    }
     names(params) <- paramnames
-    attr(params, "class") <- NULL
     clusterinfo[[i]] <- list("cluster"=i, "population"=juliastate[3][i],
                              "params"=params)
   }
+  state$clusters <- clusterinfo
+  state
+}
+
+dmm.stateAsTable <- function(juliastate,paramnames){
+  state<-list()
+  data=juliastate[1]
+  state$data<- data.frame("cluster" = data[,1],"x" = data[,2:ncol(data)])
+
+  nclusters=length(juliastate[2])
+  nparam=length(juliastate[2][1])
+
+  params=list()
+  for(i in 1:nparam){
+    params[[i]]=list(juliastate[2][1:nclusters][i])
+  }
+  clusterinfo <- data.table("cluster"=1:nclusters, "population"=juliastate[3])
+  clusterinfo[,(paramnames) := params]
   state$clusters <- clusterinfo
   state
 }

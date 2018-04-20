@@ -16,12 +16,8 @@ dmm.summarize.data.table <- function(clusterInfo){
     print(sprintf("   Cluster %d: ", i))
     print(sprintf("      Contains %d data points. ", clusterInfo$population[i]))
     for (j in 3:ncol(clusterInfo)){
-      if (is.atomic(unlist(clusterInfo[,j,with=FALSE][i]))){
-        print(sprintf("      %s: %f ", colnames(clusterInfo)[j], unlist(clusterInfo[,j,with=FALSE][i])))
-      } else {
-        print(sprintf("      %s: ", colnames(clusterInfo)[j]))
-        print(clusterInfo[,j,with=FALSE][i])
-      }
+      print(sprintf("      %s: ", colnames(clusterInfo)[j]))
+      print(clusterInfo[,j,with=FALSE][i])
     }
   }
 }
@@ -33,12 +29,8 @@ dmm.summarize.list <- function(clusterInfo){
     print(sprintf("   Cluster %d: ", i))
     print(sprintf("      Contains %d data points. ", clusterInfo[[i]]$population))
     for (j in 1:length(clusterInfo[[i]]$params)){
-      if (is.atomic(clusterInfo[[i]]$params[[j]])){
-        print(sprintf("      %s: %f ", names(clusterInfo[[i]]$params)[j], clusterInfo[[i]]$params[[j]]))
-      } else {
         print(sprintf("      %s: ", names(clusterInfo[[i]]$params)[j]))
         print(clusterInfo[[i]]$params[[j]])
-      }
     }
   }
 }
