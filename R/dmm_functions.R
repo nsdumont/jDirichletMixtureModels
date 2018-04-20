@@ -57,7 +57,7 @@ dmm.setup <- function(...) {
 #' Bulit-in models avaible are:
 #'                        "MultivariateNormal" (default),
 #'                        "UnivariateNormal",
-#'                        "UnivariateNormalKnowSigma" (requires \code{params} = sigma),
+#'                        "UnivariateNormalKnowSigma",
 #'                        "UnivariateExponential".
 #'
 #' User specified models require three R functions: \code{pdf_fct}, \code{sample_fct}, and \code{marg_fct}
@@ -444,4 +444,45 @@ dmm.summarize.list <- function(clusterInfo){
   }
 } 
 
+#' 
+#' @export
+dmmm.plot <- function(labeledData){
+  if (ncol(labeledData) == 3){
+    # 2D plot
+    # If user has ggplot2, use it
+    if (!requireNamespace("ggplot2", quietly = TRUE)) {
+      p <- ggplot( labeledData, aes(x=x.1, y=x.2 ) ) +
+        geom_point(aes(colour = factor(cluster)),alpha=0.8) +
+        xlab(expression(x[1])) + 
+        ylab(expression(x[2])) 
+      p$labels$colour <- "Cluster"
+      p
+    # Otherwise a normal plot
+    } else {
+      par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
+      plot(labeledData[,1:2], col=labeledData$cluster, pch=19,
+           ylab=expression(x[2]),
+           xlab=expression(x[1]), bty="L")
+      legend("right",inset=c(-1,0),legend = as.character(1:length(unique(labeledData$cluster))),
+             title = "Cluster",
+             col=1:length(unique(labeledData$cluster)),pch=19)
+    }
+  } else if (ncol(labeledData) == 1){
+    # 1D plot
+    par(yaxt = "n", bty = "n")
+    stripchart(labeledData[,1], col=labeledData$cluster, xlab=expression(x[1]))
+  } else if (ncol(labeledData) == 4){
+    # 3D plot
+    if (!requireNamespace("scatterplot3d", quietly = TRUE)) {
+      scatterplot3d(labeledData[,1:3], pch = 16, color=labeledData$cluster,
+                    xlab = expression(x[1]),
+                    ylab = expression(x[2]),
+                    zlab = expression(x[3]))
+    } else {
+      stop("Need package scatterplot3d for 3d plots.")
+    }
+  } else {
+    stop("Dimensionality of data too high to plot.")
+  }
+}
 

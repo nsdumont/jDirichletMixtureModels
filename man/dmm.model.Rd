@@ -41,7 +41,7 @@ or the user can specify their own model.
 Bulit-in models avaible are:
                        "MultivariateNormal" (default),
                        "UnivariateNormal",
-                       "UnivariateNormalKnowSigma" (requires \code{params} = sigma),
+                       "UnivariateNormalKnowSigma",
                        "UnivariateExponential".
 
 User specified models require three R functions: \code{pdf_fct}, \code{sample_fct}, and \code{marg_fct}

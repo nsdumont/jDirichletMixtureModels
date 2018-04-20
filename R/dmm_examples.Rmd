@@ -1,0 +1,29 @@
+---
+title: "jDirichletMixtureModels Examples"
+author: "Nicole Dumont"
+date: '2018-04-20'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+```{r ex1}
+library(jDirichletMixtureModels)
+library(ggplot2)
+
+dmm.setup()
+
+model <- dmm.model()
+
+Xdata <- data(syntheticGaussian1)
+
+states <- dmm.cluster(model, Xdata)
+dmm.plot(states[[1]]$labeledData)
+```
+
+
