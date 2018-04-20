@@ -5,7 +5,7 @@
 \title{Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 If using a user specifed model via Julia functions.}
 \usage{
-\method{dmm.cluster}{JModel}(model, data, alpha = 1, m_prior = 3,
+\method{dmm.cluster}{JModel}(model, Xdata, alpha = 1, m_prior = 3,
   m_post = 3, iters = 5000, burnin = 200, shuffle = TRUE)
 }
 \description{

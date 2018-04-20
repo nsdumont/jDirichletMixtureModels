@@ -5,7 +5,7 @@
 \title{Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 If using one of the avaible bulit-in models.}
 \usage{
-\method{dmm.cluster}{BaseModel}(model, data, alpha = 1, iters = 5000,
+\method{dmm.cluster}{BaseModel}(model, Xdata, alpha = 1, iters = 5000,
   burnin = 200, shuffle = TRUE)
 }
 \description{

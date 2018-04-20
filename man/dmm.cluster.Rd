@@ -4,13 +4,13 @@
 \alias{dmm.cluster}
 \title{Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.}
 \usage{
-dmm.cluster(model, data, alpha = 1, m_prior = 3, m_post = 3,
+dmm.cluster(model, Xdata, alpha = 1, m_prior = 3, m_post = 3,
   iters = 5000, burnin = 200, shuffle = TRUE)
 }
 \arguments{
 \item{model}{An object returned by \code{dmm.model()}.}
 
-\item{data}{A 1D array of length N (univariate case) or 2D array of size d-by-N (mulitvariate case),
+\item{Xdata}{A 1D array of length N (univariate case) or 2D array of size d-by-N (mulitvariate case),
 where d is the dimensionailty of the data and N is the number of observations.}
 
 \item{alpha}{A float. The concentration parameter. Default is 1.0.}

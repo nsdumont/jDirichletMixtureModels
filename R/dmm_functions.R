@@ -157,7 +157,7 @@ add_file <- function(filename){
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #'
 #' @param model An object returned by \code{dmm.model()}.
-#' @param data A 1D array of length N (univariate case) or 2D array of size d-by-N (mulitvariate case),
+#' @param Xdata A 1D array of length N (univariate case) or 2D array of size d-by-N (mulitvariate case),
 #'             where d is the dimensionailty of the data and N is the number of observations.
 #' @param alpha A float. The concentration parameter. Default is 1.0.
 #' @param m_prior An integer. Optionally paramter only used in non-conjugate case. Default is 3.
@@ -167,14 +167,14 @@ add_file <- function(filename){
 #' @param shuffle A logical. Whether or not to shuffle the data. Default is true.
 #'
 #' @export
-dmm.cluster <- function(model, data, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
+dmm.cluster <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
   UseMethod("dmm.cluster", model)
 }
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #' If using a user specifed model via R functions.
 #' @export
-dmm.cluster.RModel <- function(model, data, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
+dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
   # Converting all model functions to julia objects
   .dmm$julia$assign("pdf_func", JuliaObject(model$pdf_likelihood))
   .dmm$julia$assign("sample_func", JuliaObject(model$sample_posterior))
@@ -187,7 +187,7 @@ dmm.cluster.RModel <- function(model, data, alpha=1.0, m_prior=3, m_post=3, iter
     .dmm$julia$command("rmodel=GeneralNonConjugateModel(pdf_func,sample_func,marg_func,params);")
   }
   # Converting all inputs to julia objects
-  .dmm$julia$assign("Y", data)
+  .dmm$julia$assign("Y", Xdata)
   .dmm$julia$assign("alpha", alpha)
   .dmm$julia$assign("iters", iters)
   .dmm$julia$command("Int64(iters)")
@@ -195,22 +195,23 @@ dmm.cluster.RModel <- function(model, data, alpha=1.0, m_prior=3, m_post=3, iter
   .dmm$julia$command("Int64(burnin)")
   .dmm$julia$assign("shuffle", shuffle)
   # Run cluster code
-  if (model$isconjugate == TRUE) {
-    dmmstates <- .dmm$julia$eval("dp_cluster(Y, rmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle)")
-  }else{
+  if (model$isconjugate) {
+    juliastates <- .dmm$julia$eval("dp_cluster(Y, rmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle);")
+  } else {
     .dmm$julia$assign("m_prior", m_prior)
     .dmm$julia$command("Int64(m_prior)")
     .dmm$julia$assign("m_post", m_post)
     .dmm$julia$command("Int64(m_post)")
-    dmmstates <- .dmm$julia$eval("dp_cluster(Y, rmodel, alpha, m_prior=m_prior, m_post=m_post, iters=iters, burnin=burnin, shuffled=shuffle)")
+    juliastates <- .dmm$julia$eval("dp_cluster(Y, rmodel, alpha, m_prior=m_prior, m_post=m_post, iters=iters, burnin=burnin, shuffled=shuffle);")
   }
+  dmmstates <- dmm.states(juliastates,paramnames)
   return(dmmstates)
 }
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #'If using a user specifed model via Julia functions.
 #'@export
-dmm.cluster.JModel <- function(model, data, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
+dmm.cluster.JModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
   # Converting all model functions to julia objects
   .dmm$julia$assign("pdf_func", model$pdf_name)
   .dmm$julia$assign("sample_func", model$sample_name)
@@ -218,11 +219,11 @@ dmm.cluster.JModel <- function(model, data, alpha=1.0, m_prior=3, m_post=3, iter
   .dmm$julia$assign("params", JuliaObject(model$params))
   if (model$isconjugate == TRUE) {
     .dmm$julia$command("jmodel=GeneralConjugateModel(pdf_func,sample_func,marg_func,params);")
-  }else{
+  } else {
     .dmm$julia$command("jmodel=GeneralNonConjugateModel(pdf_func,sample_func,marg_func,params);")
   }
   # Converting all inputs to julia objects
-  .dmm$julia$assign("Y", data)
+  .dmm$julia$assign("Y", Xdata)
   .dmm$julia$assign("alpha", alpha)
   .dmm$julia$assign("iters", iters)
   .dmm$julia$command("Int64(iters)")
@@ -230,35 +231,37 @@ dmm.cluster.JModel <- function(model, data, alpha=1.0, m_prior=3, m_post=3, iter
   .dmm$julia$command("Int64(burnin)")
   .dmm$julia$assign("shuffle", shuffle)
   # Run cluster code
-  if (model$isconjugate == TRUE) {
-    dmmstates <- .dmm$julia$eval("dp_cluster(Y, jmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle)")
-  }else{
+  if (model$isconjugate) {
+    juliastates <- .dmm$julia$eval("dp_cluster(Y, jmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle);")
+  } else {
     .dmm$julia$assign("m_prior", m_prior)
     .dmm$julia$command("Int64(m_prior)")
     .dmm$julia$assign("m_post", m_post)
     .dmm$julia$command("Int64(m_post)")
-    dmmstates <- .dmm$julia$eval("dp_cluster(Y, jmodel, alpha, m_prior=m_prior, m_post=m_post, iters=iters, burnin=burnin, shuffled=shuffle)")
+    juliastates <- .dmm$julia$eval("dp_cluster(Y, jmodel, alpha, m_prior=m_prior, m_post=m_post, iters=iters, burnin=burnin, shuffled=shuffle);")
   }
+  dmmstates <- dmm.states(juliastates,paramnames)
   return(dmmstates)
 }
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #' If using one of the avaible bulit-in models.
+#' 
+#' 
 #' @export
-dmm.cluster.BaseModel <- function(model, data, alpha=1.0, iters=5000, burnin=200, shuffle=TRUE){
+dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=200, shuffle=TRUE){
   # Create julia model object given name
   # Case: model without params, ie using default parameters
   if (is.null(model$params)){
     strcommand <- paste0("basemodel=",model$model_type,"Model();")
-  }
   # Case: model with params, ie using user defined parameters
-  else {
+  } else {
     .dmm$julia$assign("params", model$params)
     strcommand <- paste0("basemodel=",model$model_type,"Model(params);")
   }
   .dmm$julia$command(strcommand)
   # Converting all inputs to julia objects
-  .dmm$julia$assign("Y", data)
+  .dmm$julia$assign("Y", Xdata)
   .dmm$julia$assign("alpha", alpha)
   .dmm$julia$assign("iters", iters)
   .dmm$julia$command("iters = Int64(iters);")
@@ -267,19 +270,78 @@ dmm.cluster.BaseModel <- function(model, data, alpha=1.0, iters=5000, burnin=200
   .dmm$julia$assign("shuffle", shuffle)
   
   # Run cluster code
-  dmmstates <- .dmm$julia$eval("dp_cluster(Y, basemodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle)")
+  juliastates <- .dmm$julia$eval("dp_cluster(Y, basemodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle);")
+  # Get labels/names of parameters if they exist
+  paramnames <- unlist(.dmm$julia$eval("parameter_names(basemodel);"))
+  
+  dmmstates <- dmm.states(juliastates,paramnames)
   return(dmmstates)
 }
 
-dmm.convert <- function(jstate){
-  clusterinfo = list()
-  clusterinfo$"parameters" <- field(jstate, "phi")
-  clusterinfo$"sizes" <- field(jstate, "n")
-  return(robj)
+#' Constructing list of all states from dmm.cluster run (excluding burnin)
+dmm.states <- function(juliastates, paramnames=NULL){
+  states <- list()
+  for (i in 1:length(juliastates)){
+    states[[i]] <- dmm.state(juliastates[i], paramnames)
+  }
+  return(states)
 }
 
-dmm.convertall <- function(jobjs){
-  return(robjs = list)
+dmm.state <- function(juliastate, paramnames=NULL){
+  paramlen <- length(field(juliastate,"phi")[1])
+  nums <- length(field(juliastate,"n"))
+  
+  # If any paramters names don't exist (and instead paramter_names returns NULL, which will not appear when
+  # unlisted and this paramnames won't be full size) then don't use them
+  if (length(paramnames) != paramlen){
+    paramnames <- sapply(1:nums, function(x) paste0("param.",toString(x)))
+  }
+  
+  labeledX <- data.frame("x" = field(juliastate,"data"), 
+                         "cluster" = field(juliastate,"labels"))
+  
+  parameters <- list()
+  clusterInfo <- list()
+  for (k in 1:nums){
+    parameters[[k]] <- field(juliastate,"phi")[k]
+    names(parameters[[k]]) <- paramnames
+    clusterInfo[[k]] <- list("cluster"=k, "population"=field(juliastate,"n")[k],
+                             "params"=parameters[[k]])
+  }
+  
+  state <- list(labeledData=labeledX, clusterInfo = clusterInfo)
+  return(state)
+}
+
+dmm.stateAsTable <- function(juliastate, paramnames=NULL){
+  if (!requireNamespace("data.table", quietly = TRUE)) {
+    stop("Package \"data.table\" needed for this function to work. Please install it.",
+         call. = FALSE)
+  } else {
+    paramlen <- length(field(juliastate,"phi")[1])
+    nums <- length(field(juliastate,"n"))
+    
+    # If any paramters names don't exist (and instead paramter_names returns NULL, which will not appear when
+    # unlisted and this paramnames won't be full size) then don't use them
+    if (length(paramnames) != paramlen){
+      paramnames <- sapply(1:nums, function(x) paste0("param.",toString(x)))
+    }
+    
+    labeledX <- data.frame("x" = field(juliastate,"data"), 
+                            "cluster" = field(juliastate,"labels"))
+  
+    paramters <- list()
+    for (j in 1:paramlen){
+      parameters[[j]] <- field(juliastate,"phi")[1:nums][j]
+      attr(parameters[[j]], "class") <- NULL
+    }
+    clusterInfo <- data.table("cluster" = 1:nums, "population" = field(juliastate,"n"))
+    clusterInfo[,(paramnames) := parameters]
+    
+    state <- list(labeledData=labeledX, clusterInfo = clusterInfo)
+    attr(state, "class") <- "DMMState"
+    return(state)
+  }
 }
 
 
