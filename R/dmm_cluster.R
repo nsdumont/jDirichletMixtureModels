@@ -22,20 +22,25 @@
 #' array is shuffled so that it may be used to approximate I.I.D draws from the
 #' posterior.
 #'
-#' To see a formatted summary of all the clusters in a given state use the \code{dmm.summarize(clusterInfo)} function.
+#' A single state from the returned list of states has fields \code{data} and \code{clusters}. \code{data} is a dataframe consisting of the \code{Xdata} and their cluster labels.
+#' \code{clusters} is a data.table (is the user has the data.table package loaded) or a list.
 #'
-#'@return A list of states (i.e. \code{state = states[[i]]}). A state is itself a list.
+#' If clusters is a data.table, each row refers to a cluster. Columns are the cluster label, the population, and the rest of the columns are parameters.
+#'
+#' If clusters is a list, each element of the list refers to a clsuter,  clusters[[i]] is a list containing of the above information for
+#' cluster i as elements. Each single item in clusters is a list with fields \code{cluster}, \code{population}, and \code{params}. E.g. clusters[[1]]$population is the population of cluster 1. The params field (clusterInfo[[i]]$params)
+#' is itself a list of each of the parameters
+#'
+#' To see a formatted summary of all the clusters in a given state use the \code{dmm.summarize(clusters)} function.
+#'
+#' To see a plot of the labled data in a given state use the \code{dmm.plot(data)} function.
+#'
+#' @return A list of states (i.e. \code{state = states[[i]]}). A state is itself a list.
 #' A state has two fields: \code{labeledData} and \code{clusterInfo}.
 #'
 #' \code{labeledData} is a data.frame of the \code{Xdata} data points and their cluster labels.
 #' \code{clusterInfo} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
 #' (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
-#'
-#' If clusterInfo is a data.table, each row refers to a cluster. Columns are the cluster label, the population, and the rest of the columns are parameters.
-#'
-#' If clusterInfo is a list, each element of the list refers to a clsuter,  clusterInfo[[i]] is a list containing of the above information for
-#' cluster i as elements. E.g. clusterInfo[[1]]$population is the population of cluster 1. The params field (clusterInfo[[i]]$params)
-#' is itself a list of each of the parameters
 #'
 #'
 #' @import JuliaCall
@@ -46,7 +51,48 @@ dmm.cluster <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #'
-#' If using a user specifed model via R functions.
+#' @param model An object returned by \code{dmm.model()}.
+#' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
+#'             where d is the dimensionailty of the data and N is the number of observations.
+#' @param alpha A float. The concentration parameter. Default is 1.0.
+#' @param m_prior An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param iters An integer. Number of iterations. Default is 5000.
+#' @param burnin An integer. Amount of burn-in. Default is 200.
+#' @param shuffle A logical. Whether or not to shuffle the data. Default is true.
+#'
+#' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
+#' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
+#' parameter \code{alpha}. In the 1D case, \code{Xdata} is assumed to be a 1D array of floats. In
+#' the 2D case, \code{Xdata} is assumed to be a dxN array of floats, where the data is
+#' d-dimensional and N is the number of datapoints.
+#' Returns a list of states. The elements of the list are all states
+#' post-burnin iteration, with the default being a \code{burnin} of 200. By default, this
+#' array is shuffled so that it may be used to approximate I.I.D draws from the
+#' posterior.
+#'
+#' A single state from the returned list of states has fields \code{data} and \code{clusters}. \code{data} is a dataframe consisting of the \code{Xdata} and their cluster labels.
+#' \code{clusters} is a data.table (is the user has the data.table package loaded) or a list.
+#'
+#' If clusters is a data.table, each row refers to a cluster. Columns are the cluster label, the population, and the rest of the columns are parameters.
+#'
+#' If clusters is a list, each element of the list refers to a clsuter,  clusters[[i]] is a list containing of the above information for
+#' cluster i as elements. Each single item in clusters is a list with fields \code{cluster}, \code{population}, and \code{params}. E.g. clusters[[1]]$population is the population of cluster 1. The params field (clusterInfo[[i]]$params)
+#' is itself a list of each of the parameters
+#'
+#' To see a formatted summary of all the clusters in a given state use the \code{dmm.summarize(clusters)} function.
+#'
+#' To see a plot of the labled data in a given state use the \code{dmm.plot(data)} function.
+#'
+#' @return A list of states (i.e. \code{state = states[[i]]}). A state is itself a list.
+#' A state has two fields: \code{labeledData} and \code{clusterInfo}.
+#'
+#' \code{labeledData} is a data.frame of the \code{Xdata} data points and their cluster labels.
+#' \code{clusterInfo} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
+#' (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
+#'
+#'
+#' @import JuliaCall
 #' @export
 dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
   # Converting all model functions to julia objects
@@ -89,9 +135,49 @@ dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #'
-#' If using a user specifed model via Julia functions.
+#' @param model An object returned by \code{dmm.model()}.
+#' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
+#'             where d is the dimensionailty of the data and N is the number of observations.
+#' @param alpha A float. The concentration parameter. Default is 1.0.
+#' @param m_prior An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param iters An integer. Number of iterations. Default is 5000.
+#' @param burnin An integer. Amount of burn-in. Default is 200.
+#' @param shuffle A logical. Whether or not to shuffle the data. Default is true.
 #'
-#'@export
+#' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
+#' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
+#' parameter \code{alpha}. In the 1D case, \code{Xdata} is assumed to be a 1D array of floats. In
+#' the 2D case, \code{Xdata} is assumed to be a dxN array of floats, where the data is
+#' d-dimensional and N is the number of datapoints.
+#' Returns a list of states. The elements of the list are all states
+#' post-burnin iteration, with the default being a \code{burnin} of 200. By default, this
+#' array is shuffled so that it may be used to approximate I.I.D draws from the
+#' posterior.
+#'
+#' A single state from the returned list of states has fields \code{data} and \code{clusters}. \code{data} is a dataframe consisting of the \code{Xdata} and their cluster labels.
+#' \code{clusters} is a data.table (is the user has the data.table package loaded) or a list.
+#'
+#' If clusters is a data.table, each row refers to a cluster. Columns are the cluster label, the population, and the rest of the columns are parameters.
+#'
+#' If clusters is a list, each element of the list refers to a clsuter,  clusters[[i]] is a list containing of the above information for
+#' cluster i as elements. Each single item in clusters is a list with fields \code{cluster}, \code{population}, and \code{params}. E.g. clusters[[1]]$population is the population of cluster 1. The params field (clusterInfo[[i]]$params)
+#' is itself a list of each of the parameters
+#'
+#' To see a formatted summary of all the clusters in a given state use the \code{dmm.summarize(clusters)} function.
+#'
+#' To see a plot of the labled data in a given state use the \code{dmm.plot(data)} function.
+#'
+#' @return A list of states (i.e. \code{state = states[[i]]}). A state is itself a list.
+#' A state has two fields: \code{labeledData} and \code{clusterInfo}.
+#'
+#' \code{labeledData} is a data.frame of the \code{Xdata} data points and their cluster labels.
+#' \code{clusterInfo} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
+#' (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
+#'
+#'
+#' @import JuliaCall
+#' @export
 dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
   # Converting all model functions to julia objects
   .dmm$julia$assign("params",model$params)
@@ -124,9 +210,49 @@ dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_po
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #'
-#' If using a user specifed model via Julia functions.
+#' @param model An object returned by \code{dmm.model()}.
+#' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
+#'             where d is the dimensionailty of the data and N is the number of observations.
+#' @param alpha A float. The concentration parameter. Default is 1.0.
+#' @param m_prior An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param iters An integer. Number of iterations. Default is 5000.
+#' @param burnin An integer. Amount of burn-in. Default is 200.
+#' @param shuffle A logical. Whether or not to shuffle the data. Default is true.
 #'
-#'@export
+#' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
+#' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
+#' parameter \code{alpha}. In the 1D case, \code{Xdata} is assumed to be a 1D array of floats. In
+#' the 2D case, \code{Xdata} is assumed to be a dxN array of floats, where the data is
+#' d-dimensional and N is the number of datapoints.
+#' Returns a list of states. The elements of the list are all states
+#' post-burnin iteration, with the default being a \code{burnin} of 200. By default, this
+#' array is shuffled so that it may be used to approximate I.I.D draws from the
+#' posterior.
+#'
+#' A single state from the returned list of states has fields \code{data} and \code{clusters}. \code{data} is a dataframe consisting of the \code{Xdata} and their cluster labels.
+#' \code{clusters} is a data.table (is the user has the data.table package loaded) or a list.
+#'
+#' If clusters is a data.table, each row refers to a cluster. Columns are the cluster label, the population, and the rest of the columns are parameters.
+#'
+#' If clusters is a list, each element of the list refers to a clsuter,  clusters[[i]] is a list containing of the above information for
+#' cluster i as elements. Each single item in clusters is a list with fields \code{cluster}, \code{population}, and \code{params}. E.g. clusters[[1]]$population is the population of cluster 1. The params field (clusterInfo[[i]]$params)
+#' is itself a list of each of the parameters
+#'
+#' To see a formatted summary of all the clusters in a given state use the \code{dmm.summarize(clusters)} function.
+#'
+#' To see a plot of the labled data in a given state use the \code{dmm.plot(data)} function.
+#'
+#' @return A list of states (i.e. \code{state = states[[i]]}). A state is itself a list.
+#' A state has two fields: \code{labeledData} and \code{clusterInfo}.
+#'
+#' \code{labeledData} is a data.frame of the \code{Xdata} data points and their cluster labels.
+#' \code{clusterInfo} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
+#' (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
+#'
+#'
+#' @import JuliaCall
+#' @export
 dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=4, iters=5000, burnin=200, shuffle=TRUE){
   # Converting all model functions to julia objects
   .dmm$julia$assign("params",model$params)
@@ -161,9 +287,48 @@ dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #'
-#' If using one of the avaible bulit-in models.
+#' @param model An object returned by \code{dmm.model()}.
+#' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
+#'             where d is the dimensionailty of the data and N is the number of observations.
+#' @param alpha A float. The concentration parameter. Default is 1.0.
+#' @param m_prior An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param iters An integer. Number of iterations. Default is 5000.
+#' @param burnin An integer. Amount of burn-in. Default is 200.
+#' @param shuffle A logical. Whether or not to shuffle the data. Default is true.
+#'
+#' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
+#' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
+#' parameter \code{alpha}. In the 1D case, \code{Xdata} is assumed to be a 1D array of floats. In
+#' the 2D case, \code{Xdata} is assumed to be a dxN array of floats, where the data is
+#' d-dimensional and N is the number of datapoints.
+#' Returns a list of states. The elements of the list are all states
+#' post-burnin iteration, with the default being a \code{burnin} of 200. By default, this
+#' array is shuffled so that it may be used to approximate I.I.D draws from the
+#' posterior.
+#'
+#' A single state from the returned list of states has fields \code{data} and \code{clusters}. \code{data} is a dataframe consisting of the \code{Xdata} and their cluster labels.
+#' \code{clusters} is a data.table (is the user has the data.table package loaded) or a list.
+#'
+#' If clusters is a data.table, each row refers to a cluster. Columns are the cluster label, the population, and the rest of the columns are parameters.
+#'
+#' If clusters is a list, each element of the list refers to a clsuter,  clusters[[i]] is a list containing of the above information for
+#' cluster i as elements. Each single item in clusters is a list with fields \code{cluster}, \code{population}, and \code{params}. E.g. clusters[[1]]$population is the population of cluster 1. The params field (clusterInfo[[i]]$params)
+#' is itself a list of each of the parameters
+#'
+#' To see a formatted summary of all the clusters in a given state use the \code{dmm.summarize(clusters)} function.
+#'
+#' To see a plot of the labled data in a given state use the \code{dmm.plot(data)} function.
+#'
+#' @return A list of states (i.e. \code{state = states[[i]]}). A state is itself a list.
+#' A state has two fields: \code{labeledData} and \code{clusterInfo}.
+#'
+#' \code{labeledData} is a data.frame of the \code{Xdata} data points and their cluster labels.
+#' \code{clusterInfo} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
+#' (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
 #'
 #'
+#' @import JuliaCall
 #' @export
 dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=200, shuffle=TRUE){
   # Create julia model object given name
@@ -199,7 +364,7 @@ dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=20
   return(dmmstates)
 }
 
-' Constructing list of all states from dmm.cluster run (excluding burnin).
+#' Constructing list of all states from dmm.cluster run (excluding burnin).
 #'
 #' @param juliastates The object returned by Julia code
 #' @param paramnames Optionally. A list of the parameter names. Returned by Julia code for most bulit-in models.

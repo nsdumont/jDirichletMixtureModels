@@ -1,15 +1,23 @@
 Package: jDirichletMixtureModels
-Title: What the Package Does (one line, title case)
+Title: Dirichlet Mixture Models for Clustering using Julia backend
 Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Authors@R: c(person("Nicole", "Dumont", email = "ns2dumont@uwaterloo.ca", role = c("aut", "cre")), 
+    person("Kira", "Selby", email = "kaselby@uwaterloo.ca", role = c("aut")) )
+Description: This package provides utilities for clustering using Dirichlet Process mixture models using Julia for backend computation. 
+    It supports a number of existing conjugate distribution pairs, as well as user-specified distributions. Currently, the package only 
+    supports clustering using conjugate distributions using the methods in Markov Chain Sampling Methods for Dirichlet Process Mixture 
+    Models by Radford Neal. Clustering using non-conjugate distributions is under active development.
+    Julia is a high-level, high-performance dynamic programming language for numerical computing. This package is based on the Julia package
+    DirichletMixtureModels (see https://github.com/krylea/DirichletMixtureModels.jl), which is being co-developed alongside this package.
 Depends: 
-  R (>= 3.4.0)
+    R (>= 3.4.0)
 Imports: 
-  JuliaCall
+    JuliaCall
 Suggests:
-  data.table
-License: What license is it under?
+    data.table,
+    ggplot2,
+    scatterplot3d
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1.9000
