@@ -345,7 +345,7 @@ dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=20
     # Case: model with params, ie using user defined parameters
   } else if (is.null(model$params)){
     strcommand <- paste0("basemodel=",model$model_type,"(Y);")
-  } else if{
+  } else {
     .dmm$julia$assign("params", model$params)
     strcommand <- paste0("basemodel=",model$model_type,"(params...);")
   }
