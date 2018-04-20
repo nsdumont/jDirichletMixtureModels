@@ -166,12 +166,40 @@ add_file <- function(filename){
 #' @param burnin An integer. Amount of burn-in. Default is 200.
 #' @param shuffle A logical. Whether or not to shuffle the data. Default is true.
 #'
+#' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
+#' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
+#' parameter \code{alpha}. In the 1D case, \code{Xdata} is assumed to be a 1D array of floats. In
+#' the 2D case, \code{Xdata} is assumed to be a dxN array of floats, where the data is
+#' d-dimensional and N is the number of datapoints.
+#' Returns a list of states. The elements of the list are all states 
+#' post-burnin iteration, with the default being a \code{burnin} of 200. By default, this
+#' array is shuffled so that it may be used to approximate I.I.D draws from the
+#' posterior.
+#' 
+#' To see a formatted summary of all the clusters in a given state use the \code{dmm.summarize(clusterInfo)} function. 
+#' 
+#'@return A list of states (i.e. \code{state = states[[i]]}). A state is itself a list.
+#' A state has two fields: \code{labeledData} and \code{clusterInfo}.
+#' 
+#' \code{labeledData} is a data.frame of the \code{Xdata} data points and their cluster labels.
+#' \code{clusterInfo} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
+#' (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
+#' 
+#' If clusterInfo is a data.table, each row refers to a cluster. Columns are the cluster label, the population, and the rest of the columns are parameters.
+#' 
+#' If clusterInfo is a list, each element of the list refers to a clsuter,  clusterInfo[[i]] is a list containing of the above information for 
+#' cluster i as elements. E.g. clusterInfo[[1]]$population is the population of cluster 1. The params field (clusterInfo[[i]]$params)
+#' is itself a list of each of the parameters
+#' 
+#' 
+#' @import JuliaCall
 #' @export
 dmm.cluster <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
   UseMethod("dmm.cluster", model)
 }
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
+#' 
 #' If using a user specifed model via R functions.
 #' @export
 dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
@@ -209,6 +237,7 @@ dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
 }
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
+#' 
 #'If using a user specifed model via Julia functions.
 #'@export
 dmm.cluster.JModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
@@ -245,6 +274,7 @@ dmm.cluster.JModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
 }
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
+#' 
 #' If using one of the avaible bulit-in models.
 #' 
 #' 
@@ -278,15 +308,44 @@ dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=20
   return(dmmstates)
 }
 
-#' Constructing list of all states from dmm.cluster run (excluding burnin)
+#' Constructing list of all states from dmm.cluster run (excluding burnin).
+#' 
+#' @param juliastates The object returned by Julia code
+#' @param paramnames Optionally. A list of the parameter names. Returned by Julia code for most bulit-in models.
+#' 
+#' @details Each item in the list (i.e. \code{state = states[[i]]}) is a state. A state is also a list.
+#' A state has two fields: \code{labeledData} and \code{clusterInfo}.
+#' 
+#' \code{labeledData} is a data.frame of the data points and their cluster labels.
+#' \code{clusterInfo} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
+#' (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
+#' 
+#' If clusterInfo is a data.table, each row refers to a cluster. Columns are the cluster label, the population, and the rest of the columns are parameters.
+#' 
+#' If clusterInfo is a list, each element of the list refers to a clsuter,  clusterInfo[[i]] is a list containing of the above information for 
+#' cluster i as elements. E.g. clusterInfo[[1]]$population is the population of cluster 1. The params field (clusterInfo[[i]]$params)
+#' is itself a list of each of the parameters
+#' 
+#' 
+#' @import JuliaCall
 dmm.states <- function(juliastates, paramnames=NULL){
   states <- list()
-  for (i in 1:length(juliastates)){
-    states[[i]] <- dmm.state(juliastates[i], paramnames)
+  # If user is not using data.table package
+  if (!requireNamespace("data.table", quietly = TRUE)) {
+    for (i in 1:length(juliastates)){
+      states[[i]] <- dmm.state(juliastates[i], paramnames)
+    }
+  } else {
+    # Otherwise use nice data.tables
+    for (i in 1:length(juliastates)){
+      states[[i]] <- dmm.stateAsTable(juliastates[i], paramnames)
+    }
   }
   return(states)
 }
 
+#' Formats a single DMM OutputState Julia object into a list of labeled data and list of cluster info
+#' @import JuliaCall
 dmm.state <- function(juliastate, paramnames=NULL){
   paramlen <- length(field(juliastate,"phi")[1])
   nums <- length(field(juliastate,"n"))
@@ -304,6 +363,7 @@ dmm.state <- function(juliastate, paramnames=NULL){
   clusterInfo <- list()
   for (k in 1:nums){
     parameters[[k]] <- field(juliastate,"phi")[k]
+    attr(parameters[[k]], "class") <- NULL
     names(parameters[[k]]) <- paramnames
     clusterInfo[[k]] <- list("cluster"=k, "population"=field(juliastate,"n")[k],
                              "params"=parameters[[k]])
@@ -313,11 +373,9 @@ dmm.state <- function(juliastate, paramnames=NULL){
   return(state)
 }
 
+#' Formats a single DMM OutputState Julia object into a list of labeled data and data.table of cluster info
+#' @import JuliaCall
 dmm.stateAsTable <- function(juliastate, paramnames=NULL){
-  if (!requireNamespace("data.table", quietly = TRUE)) {
-    stop("Package \"data.table\" needed for this function to work. Please install it.",
-         call. = FALSE)
-  } else {
     paramlen <- length(field(juliastate,"phi")[1])
     nums <- length(field(juliastate,"n"))
     
@@ -330,7 +388,7 @@ dmm.stateAsTable <- function(juliastate, paramnames=NULL){
     labeledX <- data.frame("x" = field(juliastate,"data"), 
                             "cluster" = field(juliastate,"labels"))
   
-    paramters <- list()
+    parameters <- list()
     for (j in 1:paramlen){
       parameters[[j]] <- field(juliastate,"phi")[1:nums][j]
       attr(parameters[[j]], "class") <- NULL
@@ -339,9 +397,51 @@ dmm.stateAsTable <- function(juliastate, paramnames=NULL){
     clusterInfo[,(paramnames) := parameters]
     
     state <- list(labeledData=labeledX, clusterInfo = clusterInfo)
-    attr(state, "class") <- "DMMState"
     return(state)
-  }
 }
+
+
+#' Summerize given a single state's cluster info
+#' 
+#' @param clusterInfo A list or data.table. Given states <- dmm.cluster(...), this input is states$clusterInfo
+#' 
+#' @export
+dmm.summarize <- function(clusterInfo){
+  UseMethod("dmm.summarize")
+}
+
+#' @export
+dmm.summarize.data.table <- function(clusterInfo){
+  print(sprintf("%d clusters were found.", nrow(clusterInfo)))
+  for (i in clusterInfo$cluster){
+    print(sprintf("   Cluster %d: ", i))
+    print(sprintf("      Contains %d data points. ", clusterInfo$population[i]))
+    for (j in 3:ncol(clusterInfo)){
+      if (is.atomic(unlist(clusterInfo[,j,with=FALSE][i]))){
+        print(sprintf("      %s: %f ", colnames(clusterInfo)[j], unlist(clusterInfo[,j,with=FALSE][i])))
+      } else {
+        print(sprintf("      %s: ", colnames(clusterInfo)[j]))
+        print(clusterInfo[,j,with=FALSE][i])
+      }
+    }
+  }
+} 
+
+#' @export
+dmm.summarize.list <- function(clusterInfo){
+  print(sprintf("%d clusters were found.", length(clusterInfo)))
+  for (i in 1:length(clusterInfo)){
+    print(sprintf("   Cluster %d: ", i))
+    print(sprintf("      Contains %d data points. ", clusterInfo[[i]]$population))
+    for (j in 1:length(clusterInfo[[i]]$params)){
+      if (is.atomic(clusterInfo[[i]]$params[[j]])){
+        print(sprintf("      %s: %f ", names(clusterInfo[[i]]$params)[j], clusterInfo[[i]]$params[[j]]))
+      } else {
+        print(sprintf("      %s: ", names(clusterInfo[[i]]$params)[j]))
+        print(clusterInfo[[i]]$params[[j]])
+      }
+    }
+  }
+} 
 
 

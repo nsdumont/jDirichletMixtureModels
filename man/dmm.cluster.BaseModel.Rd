@@ -2,13 +2,11 @@
 % Please edit documentation in R/dmm_functions.R
 \name{dmm.cluster.BaseModel}
 \alias{dmm.cluster.BaseModel}
-\title{Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
-If using one of the avaible bulit-in models.}
+\title{Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.}
 \usage{
 \method{dmm.cluster}{BaseModel}(model, Xdata, alpha = 1, iters = 5000,
   burnin = 200, shuffle = TRUE)
 }
 \description{
-Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 If using one of the avaible bulit-in models.
 }

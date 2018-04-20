@@ -25,6 +25,33 @@ where d is the dimensionailty of the data and N is the number of observations.}
 
 \item{shuffle}{A logical. Whether or not to shuffle the data. Default is true.}
 }
+\value{
+A list of states (i.e. \code{state = states[[i]]}). A state is itself a list.
+A state has two fields: \code{labeledData} and \code{clusterInfo}.
+
+\code{labeledData} is a data.frame of the \code{Xdata} data points and their cluster labels.
+\code{clusterInfo} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
+(1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
+
+If clusterInfo is a data.table, each row refers to a cluster. Columns are the cluster label, the population, and the rest of the columns are parameters.
+
+If clusterInfo is a list, each element of the list refers to a clsuter,  clusterInfo[[i]] is a list containing of the above information for 
+cluster i as elements. E.g. clusterInfo[[1]]$population is the population of cluster 1. The params field (clusterInfo[[i]]$params)
+is itself a list of each of the parameters
+}
 \description{
 Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
+}
+\details{
+Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
+clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
+parameter \code{alpha}. In the 1D case, \code{Xdata} is assumed to be a 1D array of floats. In
+the 2D case, \code{Xdata} is assumed to be a dxN array of floats, where the data is
+d-dimensional and N is the number of datapoints.
+Returns a list of states. The elements of the list are all states 
+post-burnin iteration, with the default being a \code{burnin} of 200. By default, this
+array is shuffled so that it may be used to approximate I.I.D draws from the
+posterior.
+
+To see a formatted summary of all the clusters in a given state use the \code{dmm.summarize(clusterInfo)} function.
 }
