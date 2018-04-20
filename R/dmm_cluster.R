@@ -82,18 +82,12 @@ dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
   return(dmmstates)
 }
 
+
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #'
-#'If using a user specifed model via Julia functions.
+#' If using a user specifed model via Julia functions.
+#' 
 #'@export
-dmm.cluster.JModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
-  if (model$isconjugate == TRUE) {
-    return(dmm.cluster.JConjugateModel(model, Xdata, alpha=1.0, 5000, 200, TRUE))
-  } else {
-    return(dmm.cluster.JNonConjugateModel(model, Xdata, alpha=1.0, 3, 3, 5000, 200, TRUE))
-  }
-}
-
 dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
   # Converting all model functions to julia objects
   .dmm$julia$assign("params",model$params)
@@ -119,12 +113,18 @@ dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_po
   dmmstates <- dmm.states(juliastates,paramnames)
   return(dmmstates)
 }
+
+#' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
+#'
+#' If using a user specifed model via Julia functions.
+#' 
+#'@export
 dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=4, iters=5000, burnin=200, shuffle=TRUE){
   # Converting all model functions to julia objects
   .dmm$julia$assign("params",model$params)
   .dmm$julia$command("params=(params...);")
   .dmm$julia$command(paste0("pdf_func=",model$pdf_likelihood,";"))
-  .dmm$julia$command(paste0("sample_func=",model$sample_posterior),";")
+  .dmm$julia$command(paste0("sample_func=",model$sample_prior),";")
   .dmm$julia$command(paste0("jmodel=NonConjugateModel(pdf_func,sample_func, params);"))
 
   # Converting all inputs to julia objects
