@@ -19,7 +19,7 @@ dmm.RModel <- function(pdf_func, sample_func=NULL, marg_func=NULL, params, iscon
   if (isconjugate & (is.null(marg_fct) | is.null(sample_func)) ){
     stop("Error: A marg_fct and sample_func are requried for conjugate models.")
   }
-  if isconjugate{
+  if (isconjugate){
     model <- list(pdf_likelihood=pdf_func, sample_posterior=sample_func,
                 marginal_likelihood=marg_func, params = params, isconjugate=isconjugate)
   }
@@ -47,7 +47,7 @@ dmm.RModel <- function(pdf_func, sample_func=NULL, marg_func=NULL, params, iscon
 #' @details \code{marg_name} is only requried for conjugate models.
 #'
 #' @return A model object of type JModel which can be passed to \code{dmm.cluster}.
-#' 
+#'
 #' @examples \code{dmm.addfile(filename)}
 #' \code{# The following all make models using Julia functions}
 #' \code{model <- dmm.model(pdf_name, sample_name, marg_name, params, isconjugate=TRUE)}
@@ -57,7 +57,7 @@ dmm.RModel <- function(pdf_func, sample_func=NULL, marg_func=NULL, params, iscon
 #'
 #' @export
 dmm.JModel <- function(pdf_name, sample_name=NULL, marg_name=NULL, params, isconjugate=TRUE){
-  if isconjugate {
+  if (isconjugate) {
     model <- list(pdf_likelihood=pdf_name, sample_posterior=sample_name,
                   marginal_likelihood=marg_name, params = params)
     attr(model, "class") <- "JConjugateModel"
@@ -87,7 +87,7 @@ dmm.JModel <- function(pdf_name, sample_name=NULL, marg_name=NULL, params, iscon
 #' @param isconjugate A logical. \code{TRUE} (default) if the user specfied model is conjugate, \code{FALSE} if not.
 #'
 #' @return A model object of type JModel which can be passed to \code{dmm.cluster}.
-#' 
+#'
 #' @examples \code{dmm.addfile(filename)}
 #' \code{# The following all make conjugate models using Julia functions}
 #' \code{model <- dmm.model(pdf_name, sample_name, marg_name, params, isconjugate=TRUE)}
@@ -116,7 +116,7 @@ dmm.JConjugateModel <- function(pdf_name, sample_name, marg_name, params){
 #' @param params A list of all hyperparameters needed for the above three functions.
 #'
 #' @return A model object of type JModel which can be passed to \code{dmm.cluster}.
-#' 
+#'
 #' @examples \code{dmm.addfile(filename)}
 #' \code{# The following all make nonconjugate models using Julia functions}
 #' \code{model <- dmm.model(pdf_name, sample_name, params, isconjugate=FALSE)}

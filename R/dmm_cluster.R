@@ -3,7 +3,7 @@
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #'
 #' @param model An object returned by \code{dmm.model()}.
-#' @param Xdata A 1D array of length N (univariate case) or 2D array of size d-by-N (mulitvariate case),
+#' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
 #'             where d is the dimensionailty of the data and N is the number of observations.
 #' @param alpha A float. The concentration parameter. Default is 1.0.
 #' @param m_prior An integer. Optionally paramter only used in non-conjugate case. Default is 3.
@@ -61,7 +61,11 @@ dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
     .dmm$julia$command("rmodel=GeneralNonConjugateModel(pdf_func,sample_func,marg_func,params);")
   }
   # Converting all inputs to julia objects
+  if(is.matrix(Xdata)){
+    Xdata=t(Xdata)
+  }
   .dmm$julia$assign("Y", Xdata)
+  .dmm$julia$command("Y = Array{Float64}(Y);")
   .dmm$julia$assign("alpha", alpha)
   .dmm$julia$assign("iters", iters)
   .dmm$julia$command("Int64(iters)")
@@ -86,20 +90,24 @@ dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #'
 #' If using a user specifed model via Julia functions.
-#' 
+#'
 #'@export
 dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
   # Converting all model functions to julia objects
   .dmm$julia$assign("params",model$params)
   .dmm$julia$command("params=(params...);")
   .dmm$julia$command(paste0("pdf_func=",model$pdf_likelihood,";"))
-  .dmm$julia$command(paste0("sample_func=",model$sample_posterior),";")
-  .dmm$julia$command(paste0("marg_func=",model$marginal_likelihood),";")
+  .dmm$julia$command(paste0("sample_func=",model$sample_posterior,";"))
+  .dmm$julia$command(paste0("marg_func=",model$marginal_likelihood,";"))
   #argstring=paste(model$pdf_likelihood,model$sample_posterior,model$marginal_likelihood,sep=",")
   .dmm$julia$command(paste0("jmodel=GeneralConjugateModel(pdf_func,sample_func,marg_func, params);"))
 
   # Converting all inputs to julia objects
+  if(is.matrix(Xdata)){
+    Xdata=t(Xdata)
+  }
   .dmm$julia$assign("Y", Xdata)
+  .dmm$julia$command("Y = Array{Float64}(Y);")
   .dmm$julia$assign("alpha", alpha)
   .dmm$julia$assign("iters", iters)
   .dmm$julia$command("iters = Int64(iters);")
@@ -117,18 +125,22 @@ dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_po
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
 #'
 #' If using a user specifed model via Julia functions.
-#' 
+#'
 #'@export
 dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=4, iters=5000, burnin=200, shuffle=TRUE){
   # Converting all model functions to julia objects
   .dmm$julia$assign("params",model$params)
   .dmm$julia$command("params=(params...);")
   .dmm$julia$command(paste0("pdf_func=",model$pdf_likelihood,";"))
-  .dmm$julia$command(paste0("sample_func=",model$sample_prior),";")
+  .dmm$julia$command(paste0("sample_func=",model$sample_prior,";"))
   .dmm$julia$command(paste0("jmodel=NonConjugateModel(pdf_func,sample_func, params);"))
 
   # Converting all inputs to julia objects
+  if(is.matrix(Xdata)){
+    Xdata=t(Xdata)
+  }
   .dmm$julia$assign("Y", Xdata)
+  .dmm$julia$command("Y = Array{Float64}(Y);")
   .dmm$julia$assign("alpha", alpha)
   .dmm$julia$assign("iters", iters)
   .dmm$julia$command("iters = Int64(iters);")
@@ -165,7 +177,11 @@ dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=20
   }
   .dmm$julia$command(strcommand)
   # Converting all inputs to julia objects
+  if(is.matrix(Xdata)){
+    Xdata=t(Xdata)
+  }
   .dmm$julia$assign("Y", Xdata)
+  .dmm$julia$command("Y = Array{Float64}(Y);")
   .dmm$julia$assign("alpha", alpha)
   .dmm$julia$assign("iters", iters)
   .dmm$julia$command("iters = Int64(iters);")
