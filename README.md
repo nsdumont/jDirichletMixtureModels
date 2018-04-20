@@ -1,5 +1,7 @@
 # jDirichletMixtureModels
-Package `` utilities for clustering using Dirichlet Process mixture models in R. It supports a number of existing conjugate distribution pairs, as well as user-specified distributions.
+- Currently in active development! 
+
+Package `jDirichletMixtureModels` provides utilities for clustering using Dirichlet Process mixture models in R. It supports a number of existing conjugate distribution pairs, as well as user-specified distributions.
 
 Currently, the package only supports clustering using conjugate distributions using the methods in Markov Chain Sampling Methods for Dirichlet Process Mixture Models by Radford Neal. Clustering using non-conjugate distributions is under active development.
 
@@ -9,7 +11,7 @@ This package is an R wrapper of the `Julia` package [DirechletMixtureModels](htt
 ## Getting Started
 
 ### Installation
-this package can be installed from `Github` by using `devtools`:
+This package can be installed from `Github` by using `devtools`:
 ```{r, eval=FALSE}
 devtools::install_github("nsdumont/jDirichletMixtureModels")
 ```
@@ -36,7 +38,8 @@ User defined models (both conjugate and non-conjugate) can also be used. Users m
 - The probability density likelihood
 - The sample posterior function
 - The marginal likelihood
- If these functions are R functions, models are defined as follows:
+ 
+If these functions are R functions, models are defined as follows:
  ```{r, eval=FALSE}
 model <- dmm.model(pdf_func, sample_func, marg_func, params, isconjugate)
 ```
@@ -65,7 +68,7 @@ Suppose you have a dataset of 2D 2 by N data you wish to find clusters over, wit
 This will define a conjugate multivariate Normal model (multivariate Normal likelihood with Normal-Wishart prior) over your data, with default hyper-parameters. It will then perform a run of the clustering algorithm over the data, returning a list of cluster states.
 This is a list of (effectively) I.I.D draws from the posterior over the clusters (default 5000 iterations with a burnin of 200).
 
-A cluster state, `states[[i]]`, consists of labeled data, `states[[i]]$labeledData`, and cluster information, `states[[i]]$clsuterInfo`.
+A cluster state, `states[[i]]`, consists of labeled data, `states[[i]]$labeledData`, and cluster information, `states[[i]]$clusterInfo`.
 
 Suppose I wanted to take a random draw and see a summary of the clusters for that draw. I would then run the following:
 ```
