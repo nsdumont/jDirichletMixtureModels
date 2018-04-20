@@ -54,7 +54,7 @@ dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
   .dmm$julia$assign("sample_func", JuliaObject(model$sample_posterior))
   .dmm$julia$assign("marg_func", JuliaObject(model$marginal_likelihood))
   .dmm$julia$assign("params", JuliaObject(model$params))
-  
+
   if (model$isconjugate){
     .dmm$julia$command("rmodel=GeneralConjugateModel(pdf_func,sample_func,marg_func,params);")
   } else {
@@ -87,34 +87,62 @@ dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
 #'If using a user specifed model via Julia functions.
 #'@export
 dmm.cluster.JModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
-  # Converting all model functions to julia objects
-  .dmm$julia$assign("pdf_func", model$pdf_name)
-  .dmm$julia$assign("sample_func", model$sample_name)
-  .dmm$julia$assign("marg_func", model$marginal_name)
-  .dmm$julia$assign("params", JuliaObject(model$params))
   if (model$isconjugate == TRUE) {
-    .dmm$julia$command("jmodel=GeneralConjugateModel(pdf_func,sample_func,marg_func,params);")
+    return(dmm.cluster.JConjugateModel(model, Xdata, alpha=1.0, 5000, 200, TRUE))
   } else {
-    .dmm$julia$command("jmodel=GeneralNonConjugateModel(pdf_func,sample_func,marg_func,params);")
+    return(dmm.cluster.JNonConjugateModel(model, Xdata, alpha=1.0, 3, 3, 5000, 200, TRUE))
   }
+}
+
+dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
+  # Converting all model functions to julia objects
+  .dmm$julia$assign("params",model$params)
+  .dmm$julia$command("params=(params...);")
+  .dmm$julia$command(paste0("pdf_func=",model$pdf_likelihood,";"))
+  .dmm$julia$command(paste0("sample_func=",model$sample_posterior),";")
+  .dmm$julia$command(paste0("marg_func=",model$marginal_likelihood),";")
+  #argstring=paste(model$pdf_likelihood,model$sample_posterior,model$marginal_likelihood,sep=",")
+  .dmm$julia$command(paste0("jmodel=GeneralConjugateModel(pdf_func,sample_func,marg_func, params);"))
+
   # Converting all inputs to julia objects
   .dmm$julia$assign("Y", Xdata)
   .dmm$julia$assign("alpha", alpha)
   .dmm$julia$assign("iters", iters)
-  .dmm$julia$command("Int64(iters)")
+  .dmm$julia$command("iters = Int64(iters);")
   .dmm$julia$assign("burnin", burnin)
-  .dmm$julia$command("Int64(burnin)")
+  .dmm$julia$command("burnin = Int64(burnin);")
   .dmm$julia$assign("shuffle", shuffle)
   # Run cluster code
-  if (model$isconjugate) {
-    juliastates <- .dmm$julia$eval("dp_cluster(Y, jmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle);")
-  } else {
-    .dmm$julia$assign("m_prior", m_prior)
-    .dmm$julia$command("Int64(m_prior)")
-    .dmm$julia$assign("m_post", m_post)
-    .dmm$julia$command("Int64(m_post)")
-    juliastates <- .dmm$julia$eval("dp_cluster(Y, jmodel, alpha, m_prior=m_prior, m_post=m_post, iters=iters, burnin=burnin, shuffled=shuffle);")
-  }
+  juliastates <- .dmm$julia$eval("export_r_all(Y,jmodel,
+                                 dp_cluster(Y, jmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle));")
+  paramnames <- unlist(.dmm$julia$eval("parameter_names(jmodel);"))
+  dmmstates <- dmm.states(juliastates,paramnames)
+  return(dmmstates)
+}
+dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=4, iters=5000, burnin=200, shuffle=TRUE){
+  # Converting all model functions to julia objects
+  .dmm$julia$assign("params",model$params)
+  .dmm$julia$command("params=(params...);")
+  .dmm$julia$command(paste0("pdf_func=",model$pdf_likelihood,";"))
+  .dmm$julia$command(paste0("sample_func=",model$sample_posterior),";")
+  .dmm$julia$command(paste0("jmodel=NonConjugateModel(pdf_func,sample_func, params);"))
+
+  # Converting all inputs to julia objects
+  .dmm$julia$assign("Y", Xdata)
+  .dmm$julia$assign("alpha", alpha)
+  .dmm$julia$assign("iters", iters)
+  .dmm$julia$command("iters = Int64(iters);")
+  .dmm$julia$assign("burnin", burnin)
+  .dmm$julia$command("burnin = Int64(burnin);")
+  .dmm$julia$assign("shuffle", shuffle)
+  .dmm$julia$assign("m_prior", m_prior)
+  .dmm$julia$command("m_prior = Int64(m_prior)")
+  .dmm$julia$assign("m_post", m_post)
+  .dmm$julia$command("m_post = Int64(m_post)")
+  juliastates <- .dmm$julia$eval("export_r_all(Y,jmodel,
+                                 dp_cluster(Y, jmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle));")
+  # Run cluster code
+  paramnames <- unlist(.dmm$julia$eval("parameter_names(jmodel);"))
   dmmstates <- dmm.states(juliastates,paramnames)
   return(dmmstates)
 }
@@ -144,18 +172,18 @@ dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=20
   .dmm$julia$assign("burnin", burnin)
   .dmm$julia$command("burnin = Int64(burnin);")
   .dmm$julia$assign("shuffle", shuffle)
-  
+
   # Run cluster code
   juliastates <- .dmm$julia$eval("export_r_all(Y,basemodel,
                                  dp_cluster(Y, basemodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle));")
   # Get labels/names of parameters if they exist
   paramnames <- unlist(.dmm$julia$eval("parameter_names(basemodel);"))
-  
+
   dmmstates <- dmm.states(juliastates,paramnames)
   return(dmmstates)
 }
 
-#' Constructing list of all states from dmm.cluster run (excluding burnin).
+' Constructing list of all states from dmm.cluster run (excluding burnin).
 #'
 #' @param juliastates The object returned by Julia code
 #' @param paramnames Optionally. A list of the parameter names. Returned by Julia code for most bulit-in models.
@@ -177,7 +205,7 @@ dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=20
 #' @import JuliaCall
 dmm.states <- function(juliastates, paramnames=NULL){
   states <- list()
-  paramlen=length(juliastates[1][3])
+  paramlen=length(juliastates[1][2][1])
   if (length(paramnames) != paramlen){
     paramnames <- sapply(1:paramlen, function(x) paste0("param.",toString(x)))
   }
@@ -199,32 +227,16 @@ dmm.state <- function(juliastate,paramnames){
   state<-list()
   data=juliastate[1]
   state$data<- data.frame("cluster" = data[,1],"x" = data[,2:ncol(data)])
-  
+
   clusterinfo=list()
   nclusters=length(juliastate[2])
   for(i in 1:nclusters){
     params=juliastate[2][i]
     names(params) <- paramnames
-    attr(params[[i]], "class") <- NULL
+    attr(params, "class") <- NULL
     clusterinfo[[i]] <- list("cluster"=i, "population"=juliastate[3][i],
                              "params"=params)
   }
-  state$clusters <- clusterinfo
-  state
-}
-dmm.state.astable <- function(juliastate,paramnames){
-  state <- list()
-  data <- juliastate[1]
-  state$data<- data.frame("cluster" = data[,1],"x" = data[,2:ncol(data)])
-  
-  nclusters <- length(juliastate[2])
-  parameters <- list()
-  for (j in 1:length(paramnames)){
-    parameters[[j]] <- juliastate[2][1:nclusters][j]
-    attr(parameters[[j]], "class") <- NULL
-  }
-  clusterinfo <- data.table("cluster" = 1:nclusters, "population" = juliastate[3])
-  clusterinfo[,(paramnames) := parameters]
   state$clusters <- clusterinfo
   state
 }
@@ -235,16 +247,16 @@ dmm.state.astable <- function(juliastate,paramnames){
 dmm.stateAsTable <- function(juliastate, paramnames=NULL){
   paramlen <- length(field(juliastate,"phi")[1])
   nums <- length(field(juliastate,"n"))
-  
+
   # If any paramters names don't exist (and instead paramter_names returns NULL, which will not appear when
   # unlisted and this paramnames won't be full size) then don't use them
   if (length(paramnames) != paramlen){
     paramnames <- sapply(1:nums, function(x) paste0("param.",toString(x)))
   }
-  
+
   labeledX <- data.frame("x" = field(juliastate,"data"),
                          "cluster" = field(juliastate,"labels"))
-  
+
   parameters <- list()
   for (j in 1:paramlen){
     parameters[[j]] <- field(juliastate,"phi")[1:nums][j]
@@ -252,7 +264,7 @@ dmm.stateAsTable <- function(juliastate, paramnames=NULL){
   }
   clusterInfo <- data.table("cluster" = 1:nums, "population" = field(juliastate,"n"))
   clusterInfo[,(paramnames) := parameters]
-  
+
   state <- list(labeledData=labeledX, clusterInfo = clusterInfo)
   return(state)
 }
