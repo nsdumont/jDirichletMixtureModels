@@ -54,7 +54,7 @@ All of these inputs must be strings
 
 ### Example
 
-Suppose you have a dataset of 2D 2 by N data you wish to find clusters over, with no prior knowledge of the distribution. If your data is stored as a 2D array called 'Xdata', you could run the following:
+Suppose you have a dataset of 2D N-by-2 data you wish to find clusters over, with no prior knowledge of the distribution. If your data is stored as a 2D array called 'Xdata', you could run the following:
 
 ```{r, eval=FALSE}
   library(jDirichletMixtureModels)
