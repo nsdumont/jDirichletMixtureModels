@@ -331,22 +331,27 @@ dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m
 #' @import JuliaCall
 #' @export
 dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=200, shuffle=TRUE){
-  # Create julia model object given name
-  # Case: model without params, ie using default parameters
-  if (is.null(model$params)){
-    strcommand <- paste0("basemodel=",model$model_type,"();")
-    # Case: model with params, ie using user defined parameters
-  } else {
-    .dmm$julia$assign("params", model$params)
-    strcommand <- paste0("basemodel=",model$model_type,"(params...);")
-  }
-  .dmm$julia$command(strcommand)
-  # Converting all inputs to julia objects
+  # Pass data to Julia
   if(is.matrix(Xdata)){
     Xdata=t(Xdata)
   }
   .dmm$julia$assign("Y", Xdata)
   .dmm$julia$command("Y = Array{Float64}(Y);")
+
+  # Create julia model object given name
+  # Case: model without params, ie using default parameters
+  if (is.null(model$params) & is.null(model.data)){
+    strcommand <- paste0("basemodel=",model$model_type,"();")
+    # Case: model with params, ie using user defined parameters
+  } else if (is.null(model$params)){
+    strcommand <- paste0("basemodel=",model$model_type,"(Y);")
+  } else if{
+    .dmm$julia$assign("params", model$params)
+    strcommand <- paste0("basemodel=",model$model_type,"(params...);")
+  }
+  .dmm$julia$command(strcommand)
+  # Converting all inputs to julia objects
+
   .dmm$julia$assign("alpha", alpha)
   .dmm$julia$assign("iters", iters)
   .dmm$julia$command("iters = Int64(iters);")
