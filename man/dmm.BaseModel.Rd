@@ -12,6 +12,9 @@
 
 \item{params}{A list of the hyperparameter values for the likelihood functions. Many model have default \code{params} values and thus can be made without passing any \code{params}.
 See documentation for what parameters a given model may take.}
+
+\item{data}{In lieu of explicit hyperparameter values, some models can infer good hyperparameter values from given data.
+This option is supported for MultivariateNormalModel and UnivariateNormalModel, as well as UnivariateNormalKnownSigma.}
 }
 \value{
 A model object of type BaseModel which can be passed to \code{dmm.cluster}.
@@ -24,6 +27,6 @@ Function \code{dmm.model} is an alternative method.
 Bulit-in models avaible are:
                        "MultivariateNormalModel" (default),
                        "UnivariateNormalModel",
-                       "UnivariateNormalKnowSigma",
+                       "UnivariateNormalKnownSigma",
                        "UnivariateExponentialModel".
 }

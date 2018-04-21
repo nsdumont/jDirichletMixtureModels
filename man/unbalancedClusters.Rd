@@ -9,7 +9,7 @@
 \href{https://cs.joensuu.fi/sipu/datasets/}{Clustering basic benchmark}
 }
 \usage{
-data(unbalancedClusters)
+data("unbalancedClusters", package = "jDirichletMixtureModels")
 }
 \description{
 Synthetic 2-d data with N=6500 vectors and k=8 Gaussian clusters

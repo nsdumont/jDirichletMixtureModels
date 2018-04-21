@@ -5,7 +5,7 @@
 \title{Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.}
 \usage{
 \method{dmm.cluster}{BaseModel}(model, Xdata, alpha = 1, iters = 5000,
-  burnin = 200, shuffle = TRUE)
+  burnin = 200, shuffled = TRUE)
 }
 \arguments{
 \item{model}{An object returned by \code{dmm.model()}.}
@@ -19,7 +19,7 @@ where d is the dimensionailty of the data and N is the number of observations.}
 
 \item{burnin}{An integer. Amount of burn-in. Default is 200.}
 
-\item{shuffle}{A logical. Whether or not to shuffle the data. Default is true.}
+\item{shuffled}{A logical. Whether or not to shuffled the data. Default is true.}
 
 \item{m_prior}{An integer. Optionally paramter only used in non-conjugate case. Default is 3.}
 

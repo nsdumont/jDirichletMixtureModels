@@ -50,22 +50,18 @@ dmm.plot <- function(labeledData){
   if (ncol(labeledData) == 3){
     # 2D plot
     # If user has ggplot2, use it
-    if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
       p <- ggplot( labeledData, aes(x=x.1, y=x.2 ) ) +
         geom_point(aes(colour = factor(cluster)),alpha=0.8) +
         xlab(expression(x[1])) +
-        ylab(expression(x[2]))
-      p$labels$colour <- "Cluster"
+        ylab(expression(x[2])) +
+        theme(legend.position="none")
       p
       # Otherwise a normal plot
     } else {
-      par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
       plot(labeledData[,2:3], col=labeledData$cluster, pch=19,
            ylab=expression(x[2]),
            xlab=expression(x[1]), bty="L")
-      legend("right",inset=c(-1,0),legend = as.character(1:length(unique(labeledData$cluster))),
-             title = "Cluster",
-             col=1:length(unique(labeledData$cluster)),pch=19)
     }
   } else if (ncol(labeledData) == 2){
     # 1D plot

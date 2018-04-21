@@ -1,0 +1,74 @@
+---
+title: "Tests with Bulit in Datasets"
+author: "Nicole Dumont"
+date: '2018-04-20'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Initialization
+Loading in the requried packages and doing initial setup:
+```{r loads}
+library(jDirichletMixtureModels)
+library(data.table)
+library(ggplot2)
+library(tikzDevice)
+
+dmm.setup()
+```
+
+
+## Synthetic Gaussian Data
+
+### Dataset 1
+
+Using a conjugate multivariate normal likelihood model with parameters generated using the data:
+
+```{r synGauss1}
+# Load the dataset
+data(syntheticGaussian1, package = "jDirichletMixtureModels")
+
+# Make the model
+model <- dmm.BaseModel(data=syntheticGaussian1)
+
+# Run cluster code
+states <- dmm.cluster(model, syntheticGaussian1, alpha = 10.0, iters = 1500, burnin = 1000, shuffled = TRUE)
+
+# Display result of a single state
+astate <- states[[1]]
+dmm.summarize(astate$clusters)
+
+#Create a .tex file that will contain the plot as vectors
+tikz(file = "synGauss1.tex", width = 5, height = 5)
+dmm.plot(astate$data)
+dev.off()
+```
+
+### Dataset 2
+
+Using a conjugate multivariate normal likelihood model with parameters generated using the data:
+
+```{r synGauss1}
+# Load the dataset
+data(syntheticGaussian2, package = "jDirichletMixtureModels")
+
+# Make the model
+model <- dmm.BaseModel(data=syntheticGaussian2)
+
+# Run cluster code
+states <- dmm.cluster(model, syntheticGaussian2, alpha = 10.0, iters = 1500, burnin = 1000, shuffled = TRUE)
+
+# Display result of a single state
+astate <- states[[1]]
+dmm.summarize(astate$clusters)
+
+#Create a .tex file that will contain the plot as vectors
+tikz(file = "synGauss2.tex", width = 5, height = 5)
+dmm.plot(astate$data)
+dev.off()
+```
+
+## Other

@@ -9,7 +9,7 @@
 \href{https://cs.joensuu.fi/sipu/datasets/}{Clustering basic benchmark}
 }
 \usage{
-data(syntheticGaussian1)
+data("syntheticGaussian1", package = "jDirichletMixtureModels")
 }
 \description{
 Synthetic 2-d data with N=5000 vectors and k=15 Gaussian clusters with different degree of cluster overlapping
