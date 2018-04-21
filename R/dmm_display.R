@@ -77,8 +77,8 @@ dmm.plot <- function(labeledData){
     }
   } else if (ncol(labeledData) == 2){
     # 1D plot
-    par(yaxt = "n", bty = "n")
-    stripchart(labeledData[,2], col=labeledData$cluster, xlab=expression(x[1]))
+    xplot <- data.frame(labeledData[,2],1)
+    stripchart(xplot, col=labeledData$cluster, xlab=expression(x[1]),pch=19, ylab = '',yaxt='n',bty="n")
   } else if (ncol(labeledData) == 4){
     # 3D plot
     if (!requireNamespace("scatterplot3d", quietly = TRUE)) {
