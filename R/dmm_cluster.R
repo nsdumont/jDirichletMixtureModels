@@ -10,7 +10,7 @@
 #' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
 #' @param iters An integer. Number of iterations. Default is 5000.
 #' @param burnin An integer. Amount of burn-in. Default is 200.
-#' @param shuffle A logical. Whether or not to shuffle the data. Default is true.
+#' @param shuffled A logical. Whether or not to shuffle the data. Default is true.
 #'
 #' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
 #' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
@@ -45,7 +45,7 @@
 #'
 #' @import JuliaCall
 #' @export
-dmm.cluster <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
+dmm.cluster <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffled=TRUE){
   UseMethod("dmm.cluster", model)
 }
 
@@ -59,7 +59,7 @@ dmm.cluster <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000
 #' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
 #' @param iters An integer. Number of iterations. Default is 5000.
 #' @param burnin An integer. Amount of burn-in. Default is 200.
-#' @param shuffle A logical. Whether or not to shuffle the data. Default is true.
+#' @param shuffled A logical. Whether or not to shuffle the data. Default is true.
 #'
 #' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
 #' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
@@ -94,7 +94,7 @@ dmm.cluster <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000
 #'
 #' @import JuliaCall
 #' @export
-dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
+dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffled=TRUE){
   # Converting all model functions to julia objects
   .dmm$julia$assign("pdf_func", JuliaObject(model$pdf_likelihood))
   .dmm$julia$assign("sample_func", JuliaObject(model$sample_posterior))
@@ -117,10 +117,10 @@ dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
   .dmm$julia$command("Int64(iters)")
   .dmm$julia$assign("burnin", burnin)
   .dmm$julia$command("Int64(burnin)")
-  .dmm$julia$assign("shuffle", shuffle)
+  .dmm$julia$assign("shuffled", shuffled)
   # Run cluster code
   if (model$isconjugate) {
-    juliastates <- .dmm$julia$eval("dp_cluster(Y, rmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle);")
+    juliastates <- .dmm$julia$eval("dp_cluster(Y, rmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffled);")
   } else {
     .dmm$julia$assign("m_prior", m_prior)
     .dmm$julia$command("Int64(m_prior)")
@@ -143,7 +143,7 @@ dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
 #' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
 #' @param iters An integer. Number of iterations. Default is 5000.
 #' @param burnin An integer. Amount of burn-in. Default is 200.
-#' @param shuffle A logical. Whether or not to shuffle the data. Default is true.
+#' @param shuffled A logical. Whether or not to shuffle the data. Default is true.
 #'
 #' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
 #' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
@@ -178,7 +178,7 @@ dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
 #'
 #' @import JuliaCall
 #' @export
-dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffle=TRUE){
+dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffled=TRUE){
   # Converting all model functions to julia objects
   .dmm$julia$assign("params",model$params)
   .dmm$julia$command("params=(params...);")
@@ -199,10 +199,10 @@ dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_po
   .dmm$julia$command("iters = Int64(iters);")
   .dmm$julia$assign("burnin", burnin)
   .dmm$julia$command("burnin = Int64(burnin);")
-  .dmm$julia$assign("shuffle", shuffle)
+  .dmm$julia$assign("shuffled", shuffled)
   # Run cluster code
   juliastates <- .dmm$julia$eval("export_r_all(Y,jmodel,
-                                 dp_cluster(Y, jmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle));")
+                                 dp_cluster(Y, jmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffled));")
   paramnames <- unlist(.dmm$julia$eval("parameter_names(jmodel);"))
   dmmstates <- dmm.states(juliastates,paramnames)
   return(dmmstates)
@@ -218,7 +218,7 @@ dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_po
 #' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
 #' @param iters An integer. Number of iterations. Default is 5000.
 #' @param burnin An integer. Amount of burn-in. Default is 200.
-#' @param shuffle A logical. Whether or not to shuffle the data. Default is true.
+#' @param shuffled A logical. Whether or not to shuffled the data. Default is true.
 #'
 #' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
 #' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
@@ -253,7 +253,7 @@ dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_po
 #'
 #' @import JuliaCall
 #' @export
-dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=4, iters=5000, burnin=200, shuffle=TRUE){
+dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=4, iters=5000, burnin=200, shuffled=TRUE){
   # Converting all model functions to julia objects
   .dmm$julia$assign("params",model$params)
   .dmm$julia$command("params=(params...);")
@@ -272,13 +272,13 @@ dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m
   .dmm$julia$command("iters = Int64(iters);")
   .dmm$julia$assign("burnin", burnin)
   .dmm$julia$command("burnin = Int64(burnin);")
-  .dmm$julia$assign("shuffle", shuffle)
+  .dmm$julia$assign("shuffled", shuffled)
   .dmm$julia$assign("m_prior", m_prior)
   .dmm$julia$command("m_prior = Int64(m_prior)")
   .dmm$julia$assign("m_post", m_post)
   .dmm$julia$command("m_post = Int64(m_post)")
   juliastates <- .dmm$julia$eval("export_r_all(Y,jmodel,
-                                 dp_cluster(Y, jmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle));")
+                                 dp_cluster(Y, jmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffled));")
   # Run cluster code
   paramnames <- unlist(.dmm$julia$eval("parameter_names(jmodel);"))
   dmmstates <- dmm.states(juliastates,paramnames)
@@ -295,7 +295,7 @@ dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m
 #' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
 #' @param iters An integer. Number of iterations. Default is 5000.
 #' @param burnin An integer. Amount of burn-in. Default is 200.
-#' @param shuffle A logical. Whether or not to shuffle the data. Default is true.
+#' @param shuffled A logical. Whether or not to shuffled the data. Default is true.
 #'
 #' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
 #' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
@@ -330,7 +330,7 @@ dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m
 #'
 #' @import JuliaCall
 #' @export
-dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=200, shuffle=TRUE){
+dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=200, shuffled=TRUE){
   # Pass data to Julia
   if(is.matrix(Xdata)){
     Xdata=t(Xdata)
@@ -340,7 +340,7 @@ dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=20
 
   # Create julia model object given name
   # Case: model without params, ie using default parameters
-  if (is.null(model$params) & is.null(model.data)){
+  if (is.null(model$params) & is.null(model$data)){
     strcommand <- paste0("basemodel=",model$model_type,"();")
     # Case: model with params, ie using user defined parameters
   } else if (is.null(model$params)){
@@ -357,11 +357,11 @@ dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=20
   .dmm$julia$command("iters = Int64(iters);")
   .dmm$julia$assign("burnin", burnin)
   .dmm$julia$command("burnin = Int64(burnin);")
-  .dmm$julia$assign("shuffle", shuffle)
+  .dmm$julia$assign("shuffled", shuffled)
 
   # Run cluster code
   juliastates <- .dmm$julia$eval("export_r_all(Y,basemodel,
-                                 dp_cluster(Y, basemodel, alpha, iters=iters, burnin=burnin, shuffled=shuffle));")
+                                 dp_cluster(Y, basemodel, alpha, iters=iters, burnin=burnin, shuffled=shuffled));")
   # Get labels/names of parameters if they exist
   paramnames <- unlist(.dmm$julia$eval("parameter_names(basemodel);"))
 
@@ -417,12 +417,33 @@ dmm.state <- function(juliastate,paramnames){
   clusterinfo=list()
   nclusters=length(juliastate[2])
   for(i in 1:nclusters){
-    params=juliastate[2][i]
+    ptemp=juliastate[2][i]
+    params=list()
+    for(j in 1:length(ptemp)){
+      params[[j]]=ptemp[j]
+    }
     names(params) <- paramnames
-    attr(params, "class") <- NULL
     clusterinfo[[i]] <- list("cluster"=i, "population"=juliastate[3][i],
                              "params"=params)
   }
+  state$clusters <- clusterinfo
+  state
+}
+
+dmm.stateAsTable <- function(juliastate,paramnames){
+  state<-list()
+  data=juliastate[1]
+  state$data<- data.frame("cluster" = data[,1],"x" = data[,2:ncol(data)])
+
+  nclusters=length(juliastate[2])
+  nparam=length(juliastate[2][1])
+
+  params=list()
+  for(i in 1:nparam){
+    params[[i]]=list(juliastate[2][1:nclusters][i])
+  }
+  clusterinfo <- data.table("cluster"=1:nclusters, "population"=juliastate[3])
+  clusterinfo[,(paramnames) := params]
   state$clusters <- clusterinfo
   state
 }
