@@ -13,10 +13,14 @@ o=dmm.cluster(m,X)
 state=o[[1]]
 dmm.summarize(state$clusters)
 
-Xdata=rbind(matrix(rnorm(100),ncol=2),10+matrix(rnorm(100),ncol=2)/2)
-m=dmm.BaseModel("MultivariateNormalModel")
+
+Xdata=rbind(matrix(rnorm(100),ncol=2),1+matrix(rnorm(100),ncol=2)/2)
+m=dmm.BaseModel("MultivariateNormalModel", data=Xdata)
 
 o=dmm.cluster(m,Xdata,iters=1000)
 
 state=o[[1]]
 dmm.summarize(state$clusters)
+
+
+

@@ -182,9 +182,7 @@ dmm.benchmark.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=
 
   dmmstates <- dmm.states(juliastates,paramnames)
   post=toc()
-  out=list()
-  out$pre=(pre$toc-pre$tic)
-  out$comp=(comp$toc-comp$tic)
-  out$post=(post$toc-post$tic)
-  out
+  out=data.frame("pre-computation time"=(pre$toc-pre$tic),
+                 "computation time"=(comp$toc-comp$tic),
+                 "post-computation time"=(post$toc-post$tic))
 }
