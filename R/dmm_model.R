@@ -8,7 +8,7 @@
 #'
 #' @param pdf_func A function that takes as input \code{(data, likelihoodparams, params)}. It returns the value of the probability density function likelihood at \code{(data,likelihoodparams)} given \code{params}.
 #' @param sample_fct Optional for nonconjugate models. A function takes as input \code{(data, params)}. It returns the value of the sample posterior function at \code{data} given \code{params}.
-#' @param marg_fct Only needed for conjugate models. A function takes as input \code{{(data, params)}. It returns the value of the marginal likelihood funciton at \code{data} given \code{params}..
+#' @param marg_fct Only needed for conjugate models. A function takes as input \code{(data, params)}. It returns the value of the marginal likelihood funciton at \code{data} given \code{params}..
 #' @param params A list of all hyperparameters needed for the above three functions.
 #' @param isconjugate A logical. \code{TRUE} (default) if the user specfied model is conjugate, \code{FALSE} if not.
 #'

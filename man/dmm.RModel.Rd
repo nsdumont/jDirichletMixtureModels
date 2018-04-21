@@ -15,6 +15,8 @@ dmm.RModel(pdf_func, sample_func = NULL, marg_func = NULL, params,
 \item{isconjugate}{A logical. \code{TRUE} (default) if the user specfied model is conjugate, \code{FALSE} if not.}
 
 \item{sample_fct}{Optional for nonconjugate models. A function takes as input \code{(data, params)}. It returns the value of the sample posterior function at \code{data} given \code{params}.}
+
+\item{marg_fct}{Only needed for conjugate models. A function takes as input \code{(data, params)}. It returns the value of the marginal likelihood funciton at \code{data} given \code{params}..}
 }
 \value{
 A model object of type RModel which can be passed to \code{dmm.cluster}.

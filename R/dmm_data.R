@@ -86,3 +86,23 @@
 #' dmm.plot(states[[1]]$labeledData)
 #' }
 "birch3Data"
+
+#' Mouse Data
+#'
+#' Clusters that look like Mickey mouse's head.
+#'
+#' @docType data
+#'
+#' @usage data(mouse, package = "jDirichletMixtureModels")
+#'
+#' @keywords datasets
+#' 
+#' @source \href{https://github.com/elki-project/elki/blob/master/data/synthetic/Vorlesung/mouse.csv}{mouse.csv}
+#'
+#' @examples
+#' \dontrun{
+#' Xdata <- data(mouse, package = "jDirichletMixtureModels")
+#' states <- dmm.cluster(model, Xdata)
+#' dmm.plot(states[[1]]$labeledData)
+#' }
+"mouse"

@@ -107,7 +107,7 @@ Using a conjugate multivariate normal likelihood model with parameters generated
 # Load the dataset
 data(birch3Data, package = "jDirichletMixtureModels")
 
-inds <- sample(nrow(birch3Data), 10000)
+inds <- sample(nrow(birch3Data), 5000)
 Xdata <- birch3Data[inds,]
 
 # Make the model
@@ -127,3 +127,29 @@ tikz(file = "birch.tex", width = 2.5, height = 2.5)
 dmm.plot(astate$data)
 dev.off()
 ```
+
+
+## Mouse Data
+
+```{r synGauss2}
+# Load the dataset
+data(mouse, package = "jDirichletMixtureModels")
+names(mouse) <- NULL
+# Make the model
+model <- dmm.BaseModel(data=as.matrix(mouse))
+
+# Run cluster code
+states5 <- dmm.cluster(model, as.matrix(mouse), alpha = 10.0, iters = 1500, burnin = 1000, shuffled = TRUE)
+
+# Display result of a single state
+astate <- states5[[1]]
+dmm.summarize(astate$clusters)
+
+dmm.plot(astate$data)
+
+#Create a .tex file that will contain the plot as vectors
+tikz(file = "mouse.tex", width = 2.5, height = 2.5)
+dmm.plot(astate$data)
+dev.off()
+```
+
