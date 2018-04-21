@@ -107,6 +107,9 @@ Using a conjugate multivariate normal likelihood model with parameters generated
 # Load the dataset
 data(birch3Data, package = "jDirichletMixtureModels")
 
+inds <- sample(nrow(birch3Data), 10000)
+Xdata <- birch3Data[inds,]
+
 # Make the model
 model <- dmm.BaseModel(data=birch3Data)
 
