@@ -41,8 +41,10 @@ states <- dmm.cluster(model, syntheticGaussian1, alpha = 10.0, iters = 1500, bur
 astate <- states[[1]]
 dmm.summarize(astate$clusters)
 
+dmm.plot(astate$data)
+
 #Create a .tex file that will contain the plot as vectors
-tikz(file = "synGauss1.tex", width = 5, height = 5)
+tikz(file = "synGauss1.tex", width = 2.5, height = 2.5)
 dmm.plot(astate$data)
 dev.off()
 ```
@@ -51,7 +53,7 @@ dev.off()
 
 Using a conjugate multivariate normal likelihood model with parameters generated using the data:
 
-```{r synGauss1}
+```{r synGauss2}
 # Load the dataset
 data(syntheticGaussian2, package = "jDirichletMixtureModels")
 
@@ -59,16 +61,66 @@ data(syntheticGaussian2, package = "jDirichletMixtureModels")
 model <- dmm.BaseModel(data=syntheticGaussian2)
 
 # Run cluster code
-states <- dmm.cluster(model, syntheticGaussian2, alpha = 10.0, iters = 1500, burnin = 1000, shuffled = TRUE)
+states2 <- dmm.cluster(model, syntheticGaussian2, alpha = 10.0, iters = 1500, burnin = 1000, shuffled = TRUE)
 
 # Display result of a single state
-astate <- states[[1]]
+astate <- states2[[1]]
 dmm.summarize(astate$clusters)
 
+dmm.plot(astate$data)
+
 #Create a .tex file that will contain the plot as vectors
-tikz(file = "synGauss2.tex", width = 5, height = 5)
+tikz(file = "synGauss2.tex", width = 2.5, height = 2.5)
 dmm.plot(astate$data)
 dev.off()
 ```
 
-## Other
+## Aggregation Dataset
+Using a conjugate multivariate normal likelihood model with parameters generated using the data:
+
+```{r synGauss2}
+# Load the dataset
+data(aggregationData, package = "jDirichletMixtureModels")
+
+# Make the model
+model <- dmm.BaseModel(data=aggregationData)
+
+# Run cluster code
+states3 <- dmm.cluster(model, aggregationData, alpha = 10.0, iters = 1500, burnin = 1000, shuffled = TRUE)
+
+# Display result of a single state
+astate <- states3[[1]]
+dmm.summarize(astate$clusters)
+
+dmm.plot(astate$data)
+
+#Create a .tex file that will contain the plot as vectors
+tikz(file = "aggre.tex", width = 2.5, height = 2.5)
+dmm.plot(astate$data)
+dev.off()
+```
+
+## Birch Dataset
+Using a conjugate multivariate normal likelihood model with parameters generated using the data:
+
+```{r synGauss2}
+# Load the dataset
+data(birch3Data, package = "jDirichletMixtureModels")
+
+# Make the model
+model <- dmm.BaseModel(data=birch3Data)
+
+# Run cluster code
+states4 <- dmm.cluster(model, birch3Data, alpha = 10.0, iters = 1500, burnin = 1000, shuffled = TRUE)
+
+# Display result of a single state
+astate <- states4[[1]]
+dmm.summarize(astate$clusters)
+
+dmm.plot(astate$data)
+
+#Create a .tex file that will contain the plot as vectors
+tikz(file = "birch.tex", width = 2.5, height = 2.5)
+dmm.plot(astate$data)
+dev.off()
+```
