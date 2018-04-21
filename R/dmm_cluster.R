@@ -95,7 +95,6 @@ dmm.cluster <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000
 #' @import JuliaCall
 #' @export
 dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffled=TRUE){
-  Xdata <- scale(Xdata, scale = FALSE)
   # Converting all model functions to julia objects
   .dmm$julia$assign("pdf_func", JuliaObject(model$pdf_likelihood))
   .dmm$julia$assign("sample_func", JuliaObject(model$sample_posterior))
@@ -180,7 +179,6 @@ dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
 #' @import JuliaCall
 #' @export
 dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffled=TRUE){
-  Xdata <- scale(Xdata, scale = FALSE)
   # Converting all model functions to julia objects
   .dmm$julia$assign("params",model$params)
   .dmm$julia$command("params=(params...);")
@@ -256,7 +254,6 @@ dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_po
 #' @import JuliaCall
 #' @export
 dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=4, iters=5000, burnin=200, shuffled=TRUE){
-  Xdata <- scale(Xdata, scale = FALSE)
   # Converting all model functions to julia objects
   .dmm$julia$assign("params",model$params)
   .dmm$julia$command("params=(params...);")
@@ -334,7 +331,6 @@ dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m
 #' @import JuliaCall
 #' @export
 dmm.cluster.BaseModel <- function(model, Xdata, alpha=1.0, iters=5000, burnin=200, shuffled=TRUE){
-  Xdata <- scale(Xdata, scale = FALSE)
   # Pass data to Julia
   if(is.matrix(Xdata)){
     Xdata=t(Xdata)
