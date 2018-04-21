@@ -3,7 +3,7 @@
 #' @import tictoc
 #' @export
 dmm.benchmark <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffled=TRUE){
-  UseMethod("dmm.cluster", model)
+  UseMethod("dmm.benchmark", model)
 }
 
 #' @import JuliaCall
