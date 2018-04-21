@@ -52,14 +52,14 @@ dmm.plot <- function(labeledData){
     # If user has ggplot2, use it
     if (requireNamespace("ggplot2", quietly = TRUE)) {
       p <- ggplot( labeledData, aes(x=x.1, y=x.2 ) ) +
-        geom_point(aes(colour = factor(cluster)),alpha=0.8) +
+        geom_point(aes(colour = factor(cluster)),alpha=0.6,size = 0.1, stroke = 2, shape = 16) +
         xlab(expression(x[1])) +
         ylab(expression(x[2])) +
         theme(legend.position="none")
       p
       # Otherwise a normal plot
     } else {
-      plot(labeledData[,2:3], col=labeledData$cluster, pch=19,
+      plot(labeledData[,2:3], col=labeledData$cluster, pch=16,
            ylab=expression(x[2]),
            xlab=expression(x[1]), bty="L")
     }
