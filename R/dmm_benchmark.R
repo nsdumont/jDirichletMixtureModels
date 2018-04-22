@@ -1,7 +1,9 @@
+# Timing functions for the jDirichletMixtureModels package. Currently avaible for testing purposes.
+
 #' To get MCMC computation times
 #' 
 #' This function is the same as \code{dmm.cluster} except instead of returning the states it returns the time it took to do 
-#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' preprocessing computations, the MCMC computation, and the postprocessing computations. Currently avaible for testing purposes.
 #' 
 #' @param model An object returned by \code{dmm.model()}.
 #' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
@@ -37,7 +39,7 @@ dmm.benchmark <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=50
 #' To get MCMC computation times
 #' 
 #' This function is the same as \code{dmm.cluster} except instead of returning the states it returns the time it took to do 
-#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' preprocessing computations, the MCMC computation, and the postprocessing computations. Currently avaible for testing purposes.
 #' 
 #' @param model An object returned by \code{dmm.model()}.
 #' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
@@ -107,7 +109,7 @@ dmm.benchmark.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_
 #' To get MCMC computation times
 #' 
 #' This function is the same as \code{dmm.cluster} except instead of returning the states it returns the time it took to do 
-#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' preprocessing computations, the MCMC computation, and the postprocessing computations. Currently avaible for testing purposes.
 #' 
 #' @param model An object returned by \code{dmm.model()}.
 #' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
@@ -179,7 +181,7 @@ dmm.benchmark.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3,
 #' To get MCMC computation times
 #' 
 #' This function is the same as \code{dmm.cluster} except instead of returning the states it returns the time it took to do 
-#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' preprocessing computations, the MCMC computation, and the postprocessing computations. Currently avaible for testing purposes.
 #' 
 #' @param model An object returned by \code{dmm.model()}.
 #' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),

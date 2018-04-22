@@ -1,6 +1,8 @@
 ## Cluster and state conversion functions for the jDirichletMixtureModels Package
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
+#' 
+#' @usage dmm.cluster(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffled=TRUE)
 #'
 #' @param model An object returned by \code{dmm.model()}.
 #' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
@@ -42,6 +44,10 @@
 #' \code{clusterInfo} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
 #' (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
 #'
+#'
+#' @examples dmm.setup()
+#' model <- dmm.BaseModel(data = Xdata)
+#' states <- dmm.cluster(model, Xdata)
 #'
 #' @import JuliaCall
 #' @export
@@ -182,6 +188,10 @@ dmm.cluster.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, ite
 #' \code{clusters} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
 #' (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
 #'
+#' @examples dmm.setup()
+#' dmm.addfile(filename)
+#' model <- dmm.JConjugateModel(pdf_name, sample_name, marg_name, params)
+#' states <- dmm.cluster(model, Xdata)
 #'
 #' @import JuliaCall
 #' @export
@@ -258,6 +268,10 @@ dmm.cluster.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_po
 #' \code{clusters} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
 #' (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
 #'
+#'@examples dmm.setup()
+#' dmm.addfile(filename)
+#' model <- dmm.JNonConjugateModel(pdf_name, sample_name, params)
+#' states <- dmm.cluster(model, Xdata)
 #'
 #' @import JuliaCall
 #' @export
@@ -294,6 +308,8 @@ dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m
 }
 
 #' Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.
+#' 
+#' @usage dmm.cluster.BaseModel(model, Xdata, alpha=1.0, iters=5000, burnin=200, shuffled=TRUE)
 #'
 #' @param model An object returned by \code{dmm.model()}.
 #' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
@@ -335,6 +351,9 @@ dmm.cluster.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m
 #' \code{clusters} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
 #' (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
 #'
+#'@examples dmm.setup()
+#' model <- dmm.BaseModel(data = Xdata)
+#' states <- dmm.cluster(model, Xdata)
 #'
 #' @import JuliaCall
 #' @export

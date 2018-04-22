@@ -4,8 +4,7 @@
 \alias{dmm.cluster.BaseModel}
 \title{Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.}
 \usage{
-\method{dmm.cluster}{BaseModel}(model, Xdata, alpha = 1, iters = 5000,
-  burnin = 200, shuffled = TRUE)
+dmm.cluster.BaseModel(model, Xdata, alpha=1.0, iters=5000, burnin=200, shuffled=TRUE)
 }
 \arguments{
 \item{model}{An object returned by \code{dmm.model()}.}
@@ -27,10 +26,10 @@ where d is the dimensionailty of the data and N is the number of observations.}
 }
 \value{
 A list of states (i.e. \code{state = states[[i]]}). A state is itself a list.
-A state has two fields: \code{labeledData} and \code{clusterInfo}.
+A state has two fields: \code{data} and \code{clusters}.
 
-\code{labeledData} is a data.frame of the \code{Xdata} data points and their cluster labels.
-\code{clusterInfo} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
+\code{data} is a data.frame of the \code{Xdata} data points and their cluster labels.
+\code{clusters} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
 (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
 }
 \description{
@@ -53,10 +52,16 @@ A single state from the returned list of states has fields \code{data} and \code
 If clusters is a data.table, each row refers to a cluster. Columns are the cluster label, the population, and the rest of the columns are parameters.
 
 If clusters is a list, each element of the list refers to a clsuter,  clusters[[i]] is a list containing of the above information for
-cluster i as elements. Each single item in clusters is a list with fields \code{cluster}, \code{population}, and \code{params}. E.g. clusters[[1]]$population is the population of cluster 1. The params field (clusterInfo[[i]]$params)
+cluster i as elements. Each single item in clusters is a list with fields \code{cluster}, \code{population}, and \code{params}. E.g. clusters[[1]]$population is the population of cluster 1. The params field (clusters[[i]]$params)
 is itself a list of each of the parameters
 
 To see a formatted summary of all the clusters in a given state use the \code{dmm.summarize(clusters)} function.
 
 To see a plot of the labled data in a given state use the \code{dmm.plot(data)} function.
+}
+\examples{
+dmm.setup()
+model <- dmm.BaseModel(data = Xdata)
+states <- dmm.cluster(model, Xdata)
+
 }

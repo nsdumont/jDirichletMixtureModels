@@ -4,7 +4,7 @@
 \alias{dmm.stateAsTable}
 \title{Formats a single DMM OutputState Julia object into a list of labeled data and data.table of cluster info}
 \usage{
-dmm.stateAsTable(juliastate, paramnames = NULL)
+dmm.stateAsTable(juliastate, paramnames)
 }
 \description{
 Formats a single DMM OutputState Julia object into a list of labeled data and data.table of cluster info

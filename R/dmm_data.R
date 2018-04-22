@@ -1,3 +1,5 @@
+# Synthetic Cluster Datasets that can be used with jDirichletMixtureModels
+
 #' Synthetic Gaussian Cluster Data 1
 #'
 #' Synthetic 2-d data with N=5000 vectors and k=15 Gaussian clusters with different degree of cluster overlapping
@@ -64,28 +66,6 @@
 #' dmm.plot(states[[1]]$labeledData)
 #' }
 "aggregationData"
-
-#' Birch3 Data
-#'
-#' Synthetic 2-d data with N=100,000 vectors and k=100 clusters. Random sized clusters in random locations.
-#'
-#' @docType data
-#'
-#' @usage data(birch3Data, package = "jDirichletMixtureModels")
-#'
-#' @keywords datasets
-#'
-#' @references Zhang et al., "BIRCH: A new data clustering algorithm and its applications", Data Mining and Knowledge Discovery, 1 (2), 141-182, 1997.
-#'
-#' @source \href{https://cs.joensuu.fi/sipu/datasets/}{Clustering basic benchmark}
-#'
-#' @examples
-#' \dontrun{
-#' Xdata <- data(birch3Data, package = "jDirichletMixtureModels")
-#' states <- dmm.cluster(model, Xdata)
-#' dmm.plot(states[[1]]$labeledData)
-#' }
-"birch3Data"
 
 #' Mouse Data
 #'

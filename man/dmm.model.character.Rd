@@ -7,6 +7,6 @@
 \method{dmm.model}{character}(...)
 }
 \description{
-If a string is passed as the first input to \code{dmm.model} it will create and return either a BaseModel (if passed one string, plus an optional \code{params}) (see \code{dmm.model.BaseModel}),
-or a JModel (see \code{dmm.model.JModel})
+If a string is passed as the first input to \code{dmm.model} it will create and return either a BaseModel (if passed one string, plus an optional \code{params}) (see \code{dmm.BaseModel}),
+or a JModel (see \code{dmm.JModel})
 }

@@ -4,11 +4,11 @@
 \alias{dmm.JNonConjugateModel}
 \title{Create a nonconjugate model using Julia fucntions}
 \usage{
-\code{dmm.addfile(filename)}
-\code{model <- dmm.model(pdf_name, sample_name, marg_name, params, isconjugate=TRUE)}
+dmm.addfile(filename)
+model <- dmm.model(pdf_name, sample_name, marg_name, params, isconjugate=TRUE)
 }
 \arguments{
-\item{pdf_name}{A string. The name of the Julia function in \code{filename} that returns the probability density function likelihood. The function should be of the form \code{pdf_name(y::Float64, θ::Tuple, params::Tuple)} or \code{pdf_name(y::Array{Float64,1}, θ::Tuple, params::Tuple)}.}
+\item{pdf_name}{A string. The name of the Julia function in \code{filename} that returns the probability density function likelihood. The function should be of the form \code{pdf_name(y::Float64, theta::Tuple, params::Tuple)} or \code{pdf_name(y::Array{Float64,1}, theta::Tuple, params::Tuple)}.}
 
 \item{sample_name}{A string. The name of the Julia function in \code{filename} that returns the sample prior. The function should be of the form \code{sample_name(y::Float64, params::Tuple)}, \code{sample_name(y::Array{Float64,1}, params::Tuple)} or \code{sample_name(y::Array{Float64,2}, params::Tuple)}.}
 
@@ -22,10 +22,10 @@ Create an model object to be used in the \code{dmm.cluster} function, using user
 Functions \code{dmm.JModel} and \code{dmm.model} are alternatives..
 }
 \examples{
-\\code{dmm.addfile(filename)}
-\\code{# The following all make nonconjugate models using Julia functions}
-\\code{model <- dmm.model(pdf_name, sample_name, params, isconjugate=FALSE)}
-\\code{model <- dmm.Jmodel(pdf_name, sample_name, params, isconjugate=FALSE)}
-\\code{model <- dmm.JNonConjugateModel(pdf_name, sample_name, params)}
+dmm.addfile(filename)
+# The following all make nonconjugate models using Julia functions
+model <- dmm.model(pdf_name, sample_name, params, isconjugate=FALSE)
+model <- dmm.Jmodel(pdf_name, sample_name, params, isconjugate=FALSE)
+model <- dmm.JNonConjugateModel(pdf_name, sample_name, params)
 
 }

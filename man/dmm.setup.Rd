@@ -4,17 +4,18 @@
 \alias{dmm.setup}
 \title{Do initial setup for jDirichletMixtureModels package.}
 \usage{
-dmm.setup(...)
+dmm.setup()
 }
 \arguments{
-\item{...}{arguments passed to \code{JuliaCall::julia_setup}.}
+\item{...}{arguments passed to \code{JuliaCall::julia_setup}. Most noteable:the first input should be the path to the folder in which the Julia bin file is located on the user's machine. 
+It will default to using the macOSX path for the most recent Julia version.}
 }
 \description{
 \code{dmm.setup} does the initial setup for jDirichletMixtureModels package.
 }
 \examples{
 \dontrun{
-DMM.setup()
+dmm.setup()
 }
 
 }

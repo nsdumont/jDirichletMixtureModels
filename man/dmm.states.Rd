@@ -16,15 +16,15 @@ Constructing list of all states from dmm.cluster run (excluding burnin).
 }
 \details{
 Each item in the list (i.e. \code{state = states[[i]]}) is a state. A state is also a list.
-A state has two fields: \code{labeledData} and \code{clusterInfo}.
+A state has two fields: \code{data} and \code{clusters}.
 
-\code{labeledData} is a data.frame of the data points and their cluster labels.
-\code{clusterInfo} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
+\code{data} is a data.frame of the data points and their cluster labels.
+\code{clusters} is either a list or a data.table (if the data.table package is loaded by the user). It conatins
 (1) cluster labels, (2) the number of data points (i.e. population) of each cluster, and (3) all of the parameters for each cluster.
 
-If clusterInfo is a data.table, each row refers to a cluster. Columns are the cluster label, the population, and the rest of the columns are parameters.
+If clusters is a data.table, each row refers to a cluster. Columns are the cluster label, the population, and the rest of the columns are parameters.
 
-If clusterInfo is a list, each element of the list refers to a clsuter,  clusterInfo[[i]] is a list containing of the above information for
-cluster i as elements. E.g. clusterInfo[[1]]$population is the population of cluster 1. The params field (clusterInfo[[i]]$params)
+If clusters is a list, each element of the list refers to a clsuter,  clusters[[i]] is a list containing of the above information for
+cluster i as elements. E.g. clusters[[1]]$population is the population of cluster 1. The params field (clusters[[i]]$params)
 is itself a list of each of the parameters
 }

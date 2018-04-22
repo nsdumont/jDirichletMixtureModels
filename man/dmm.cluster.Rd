@@ -4,8 +4,7 @@
 \alias{dmm.cluster}
 \title{Use a Dirichlet Mixture Model on data to get cluster labels and cluster parameter values.}
 \usage{
-dmm.cluster(model, Xdata, alpha = 1, m_prior = 3, m_post = 3,
-  iters = 5000, burnin = 200, shuffled = TRUE)
+dmm.cluster(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffled=TRUE)
 }
 \arguments{
 \item{model}{An object returned by \code{dmm.model()}.}
@@ -59,4 +58,10 @@ is itself a list of each of the parameters
 To see a formatted summary of all the clusters in a given state use the \code{dmm.summarize(clusters)} function.
 
 To see a plot of the labled data in a given state use the \code{dmm.plot(data)} function.
+}
+\examples{
+dmm.setup()
+model <- dmm.BaseModel(data = Xdata)
+states <- dmm.cluster(model, Xdata)
+
 }

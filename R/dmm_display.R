@@ -1,14 +1,28 @@
 ## Display functions (summarize and plot) for the jDirichletMixtureModels Package
 
 #' Summerize given a single state's cluster info
+#' 
+#' @usage dmm.summarize(clusterInfo)
 #'
-#' @param clusterInfo A list or data.table. Given states <- dmm.cluster(...), this input is states$clusterInfo
+#' @param clusterInfo A list or data.table. Given states <- dmm.cluster(...), this input is states[[i]]$clusters
+#' 
+#' @examples states <- dmm.cluster(model, data)
+#' dmm.summarize(states[[1]]$clusters)
 #'
 #' @export
 dmm.summarize <- function(clusterInfo){
   UseMethod("dmm.summarize")
 }
 
+#' Summerize given a single state's cluster info
+#' 
+#' @usage dmm.summarize(clusterInfo)
+#'
+#' @param clusterInfo A data.table. Given states <- dmm.cluster(...), this input is states[[i]]$clusters
+#' 
+#' @examples states <- dmm.cluster(model, data)
+#' dmm.summarize(states[[1]]$clusters)
+#'
 #' @export
 dmm.summarize.data.table <- function(clusterInfo){
   print(sprintf("%d clusters were found.", nrow(clusterInfo)))
@@ -22,6 +36,15 @@ dmm.summarize.data.table <- function(clusterInfo){
   }
 }
 
+#' Summerize given a single state's cluster info
+#' 
+#' @usage dmm.summarize(clusterInfo)
+#'
+#' @param clusterInfo A list. Given states <- dmm.cluster(...), this input is states[[i]]$clusters
+#' 
+#' @examples states <- dmm.cluster(model, data)
+#' dmm.summarize(states[[1]]$clusters)
+#'
 #' @export
 dmm.summarize.list <- function(clusterInfo){
   print(sprintf("%d clusters were found.", length(clusterInfo)))
@@ -37,13 +60,15 @@ dmm.summarize.list <- function(clusterInfo){
 
 #' Plot labeledData for a state returned by dmm
 #'
-#' @usage \code{ states <- dmm.cluster(model,Xdata,...)  }
-#' \code{ dmm.plot(states[[1]]$data)  }
+#' @usage  dmm.plot(labeledData)  
 #'
 #' Given the data from a single state returned by dmm.cluster(...), plot it. Can do 2D, 1D, or 3D plots.
 #' \code{ggplot2} recommanded for 2D plots. \code{scatterplot3d} requried for 3D plots.
 #'
-#' @param labeledData The data from a single state. A single state is one item of the list of states deturned by mm.cluster(...).
+#' @param labeledData The data from a single state. Given states <- dmm.cluster(...), this input is states[[i]]$data.
+#' 
+#' @examples states <- dmm.cluster(model,Xdata,...)  
+#'  dmm.plot(states[[1]]$data)  
 #'
 #' @export
 dmm.plot <- function(labeledData){

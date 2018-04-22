@@ -4,7 +4,7 @@
 \alias{dmm.BaseModel}
 \title{Create a model using bulit-in conjugate models}
 \usage{
-\code{model <- dmm.BaseModel(typename, params)}
+model <- dmm.BaseModel(typename, params)
 }
 \arguments{
 \item{typename}{A string. The name of the predefined conjugate prior you wish to use. Options listed under details.

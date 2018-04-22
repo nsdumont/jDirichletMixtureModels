@@ -4,7 +4,7 @@
 \alias{dmm.model}
 \title{Create a model}
 \usage{
-\code{dmm.model(...)}
+dmm.model(...)
 }
 \value{
 A model object which can be passed to \code{dmm.cluster}.
@@ -15,6 +15,8 @@ Make a model object to be passed to \code{dmm.cluster}. If not passed any argurm
 \details{
 Depending on what argurments are passed to \code{dmm.model()} either a BaseModel (see \code{dmm.BaseModel}),
 a RModel (see \code{dmm.RModel}), or JModel (see \code{dmm.JModel}) will be made.
+
+*NOTE: The use of RModels is not avaible in the current version of jDirichletMixtureModels*
 }
 \examples{
 \dontrun{

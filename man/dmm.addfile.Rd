@@ -10,5 +10,5 @@ dmm.addfile(filename)
 \item{filename}{The name of the Julia file.}
 }
 \description{
-This function must be called before runnning the \code{dmm.cluster} function using a JModel (see \code{dmm.model.JModel}).
+This function must be called before runnning the \code{dmm.cluster} function using a JModel (see \code{dmm.JModel}).
 }

@@ -7,5 +7,5 @@
 \method{dmm.model}{function}(...)
 }
 \description{
-If a function is passed as the first input to \code{dmm.model} it will create and return an Rmodel (see \code{dmm.model.RModel}).
+If a function is passed as the first input to \code{dmm.model} it will create and return an Rmodel (see \code{dmm.RModel}).
 }

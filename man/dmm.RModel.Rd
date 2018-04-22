@@ -20,10 +20,13 @@ dmm.RModel(pdf_func, sample_func = NULL, marg_func = NULL, params,
 }
 \value{
 A model object of type RModel which can be passed to \code{dmm.cluster}.
+
+#@export
 }
 \description{
-Create an model object to be used in the \code{dmm.cluster} function, using user given R functions.
+*NOTE: This function is not avaible in the current version of jDirichletMixtureModels.*
+ Create an model object to be used in the \code{dmm.cluster} function, using user given R functions.
 }
 \details{
-@usage \code{model <- dmm.Rmodel(pdf_fct, sample_fct, marg_fct, params, isconjugate=TRUE)}
+@usage model <- dmm.Rmodel(pdf_fct, sample_fct, marg_fct, params, isconjugate=TRUE)
 }

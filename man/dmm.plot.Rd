@@ -4,15 +4,19 @@
 \alias{dmm.plot}
 \title{Plot labeledData for a state returned by dmm}
 \usage{
-\code{ states <- dmm.cluster(model,Xdata,...)  }
-\code{ dmm.plot(states[[1]]$labeledData)  }
+dmm.plot(labeledData)  
 
-Given the labeledData from a single state returned by dmm.cluster(...), plot it. Can do 2D, 1D, or 3D plots.
+Given the data from a single state returned by dmm.cluster(...), plot it. Can do 2D, 1D, or 3D plots.
 \code{ggplot2} recommanded for 2D plots. \code{scatterplot3d} requried for 3D plots.
 }
 \arguments{
-\item{labeledData}{The labeledData from a single state. A single state is one item of the list of states deturned by mm.cluster(...).}
+\item{labeledData}{The data from a single state. Given states <- dmm.cluster(...), this input is states[[i]]$data.}
 }
 \description{
 Plot labeledData for a state returned by dmm
+}
+\examples{
+states <- dmm.cluster(model,Xdata,...)  
+ dmm.plot(states[[1]]$data)  
+
 }
