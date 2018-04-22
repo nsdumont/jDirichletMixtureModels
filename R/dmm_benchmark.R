@@ -1,4 +1,29 @@
-
+#' To get MCMC computation times
+#' 
+#' This function is the same as \code{dmm.cluster} except instead of returning the states it returns the time it took to do 
+#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' 
+#' @param model An object returned by \code{dmm.model()}.
+#' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
+#'             where d is the dimensionailty of the data and N is the number of observations.
+#' @param alpha A float. The concentration parameter. Default is 1.0.
+#' @param m_prior An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param iters An integer. Number of iterations. Default is 5000.
+#' @param burnin An integer. Amount of burn-in. Default is 200.
+#' @param shuffled A logical. Whether or not to shuffle the data. Default is true.
+#'
+#' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
+#' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
+#' parameter \code{alpha}. In the 1D case, \code{Xdata} is assumed to be a 1D array of floats. In
+#' the 2D case, \code{Xdata} is assumed to be a dxN array of floats, where the data is
+#' d-dimensional and N is the number of datapoints.
+#' Returns a dataframe of the time it took to do 
+#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' 
+#' @return A dataframe of the time in seconds it took to do 
+#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' 
 #' @import JuliaCall
 #' @import tictoc
 #' @export
@@ -6,48 +31,35 @@ dmm.benchmark <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=50
   UseMethod("dmm.benchmark", model)
 }
 
-#' @import JuliaCall
-#' @import tictoc
-#' @export
-dmm.benchmark.RModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_post=3, iters=5000, burnin=200, shuffled=TRUE){
-  # Converting all model functions to julia objects
-  .dmm$julia$assign("pdf_func", JuliaObject(model$pdf_likelihood))
-  .dmm$julia$assign("sample_func", JuliaObject(model$sample_posterior))
-  .dmm$julia$assign("marg_func", JuliaObject(model$marginal_likelihood))
-  .dmm$julia$assign("params", JuliaObject(model$params))
-
-  if (model$isconjugate){
-    .dmm$julia$command("rmodel=GeneralConjugateModel(pdf_func,sample_func,marg_func,params);")
-  } else {
-    .dmm$julia$command("rmodel=GeneralNonConjugateModel(pdf_func,sample_func,marg_func,params);")
-  }
-  # Converting all inputs to julia objects
-  if(is.matrix(Xdata)){
-    Xdata=t(Xdata)
-  }
-  .dmm$julia$assign("Y", Xdata)
-  .dmm$julia$command("Y = Array{Float64}(Y);")
-  .dmm$julia$assign("alpha", alpha)
-  .dmm$julia$assign("iters", iters)
-  .dmm$julia$command("Int64(iters)")
-  .dmm$julia$assign("burnin", burnin)
-  .dmm$julia$command("Int64(burnin)")
-  .dmm$julia$assign("shuffled", shuffled)
-  # Run cluster code
-  if (model$isconjugate) {
-    juliastates <- .dmm$julia$eval("dp_cluster(Y, rmodel, alpha, iters=iters, burnin=burnin, shuffled=shuffled);")
-  } else {
-    .dmm$julia$assign("m_prior", m_prior)
-    .dmm$julia$command("Int64(m_prior)")
-    .dmm$julia$assign("m_post", m_post)
-    .dmm$julia$command("Int64(m_post)")
-    juliastates <- .dmm$julia$eval("dp_cluster(Y, rmodel, alpha, m_prior=m_prior, m_post=m_post, iters=iters, burnin=burnin, shuffled=shuffle);")
-  }
-  dmmstates <- dmm.states(juliastates,paramnames)
-  return(dmmstates)
-}
 
 
+
+#' To get MCMC computation times
+#' 
+#' This function is the same as \code{dmm.cluster} except instead of returning the states it returns the time it took to do 
+#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' 
+#' @param model An object returned by \code{dmm.model()}.
+#' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
+#'             where d is the dimensionailty of the data and N is the number of observations.
+#' @param alpha A float. The concentration parameter. Default is 1.0.
+#' @param m_prior An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param iters An integer. Number of iterations. Default is 5000.
+#' @param burnin An integer. Amount of burn-in. Default is 200.
+#' @param shuffled A logical. Whether or not to shuffle the data. Default is true.
+#'
+#' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
+#' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
+#' parameter \code{alpha}. In the 1D case, \code{Xdata} is assumed to be a 1D array of floats. In
+#' the 2D case, \code{Xdata} is assumed to be a dxN array of floats, where the data is
+#' d-dimensional and N is the number of datapoints.
+#' Returns a dataframe of the time it took to do 
+#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' 
+#' @return A dataframe of the time in seconds it took to do 
+#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' 
 #' @import JuliaCall
 #' @import tictoc
 #' @export
@@ -92,6 +104,32 @@ dmm.benchmark.JConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3, m_
 }
 
 
+#' To get MCMC computation times
+#' 
+#' This function is the same as \code{dmm.cluster} except instead of returning the states it returns the time it took to do 
+#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' 
+#' @param model An object returned by \code{dmm.model()}.
+#' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
+#'             where d is the dimensionailty of the data and N is the number of observations.
+#' @param alpha A float. The concentration parameter. Default is 1.0.
+#' @param m_prior An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param iters An integer. Number of iterations. Default is 5000.
+#' @param burnin An integer. Amount of burn-in. Default is 200.
+#' @param shuffled A logical. Whether or not to shuffle the data. Default is true.
+#'
+#' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
+#' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
+#' parameter \code{alpha}. In the 1D case, \code{Xdata} is assumed to be a 1D array of floats. In
+#' the 2D case, \code{Xdata} is assumed to be a dxN array of floats, where the data is
+#' d-dimensional and N is the number of datapoints.
+#' Returns a dataframe of the time it took to do 
+#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' 
+#' @return A dataframe of the time in seconds it took to do 
+#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' 
 #' @import JuliaCall
 #' @import tictoc
 #' @export
@@ -138,6 +176,32 @@ dmm.benchmark.JNonConjugateModel <- function(model, Xdata, alpha=1.0, m_prior=3,
 }
 
 
+#' To get MCMC computation times
+#' 
+#' This function is the same as \code{dmm.cluster} except instead of returning the states it returns the time it took to do 
+#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' 
+#' @param model An object returned by \code{dmm.model()}.
+#' @param Xdata A 1D array of length N (univariate case) or 2D array of size N-by-d (mulitvariate case),
+#'             where d is the dimensionailty of the data and N is the number of observations.
+#' @param alpha A float. The concentration parameter. Default is 1.0.
+#' @param m_prior An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param m_post An integer. Optionally paramter only used in non-conjugate case. Default is 3.
+#' @param iters An integer. Number of iterations. Default is 5000.
+#' @param burnin An integer. Amount of burn-in. Default is 200.
+#' @param shuffled A logical. Whether or not to shuffle the data. Default is true.
+#'
+#' @details Performs \code{iters} iterations of Algorithm 2 (in conjugate case) or Algorithm 8 (in non-conjugate case) from Neal(2000) to generate possible
+#' clusters for the data in \code{Xdata}, using the model in \code{model}, with concentration
+#' parameter \code{alpha}. In the 1D case, \code{Xdata} is assumed to be a 1D array of floats. In
+#' the 2D case, \code{Xdata} is assumed to be a dxN array of floats, where the data is
+#' d-dimensional and N is the number of datapoints.
+#' Returns a dataframe of the time it took to do 
+#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' 
+#' @return A dataframe of the time in seconds it took to do 
+#' preprocessing computations, the MCMC computation, and the postprocessing computations.
+#' 
 #' @import JuliaCall
 #' @import tictoc
 #' @export

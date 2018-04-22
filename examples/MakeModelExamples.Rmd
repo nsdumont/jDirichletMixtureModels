@@ -1,0 +1,60 @@
+---
+title: "ExampleOfUse"
+author: "Nicole Dumont"
+date: '2018-04-21'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup
+```{r setuplib}
+library(jDirichletMixtureModels)
+
+dmm.setup()
+```
+
+
+## Example 1: Using BaseModel
+
+An exmaple of creating a BaseModel object to use a bulit-in conjugate model and getting the cluster information:
+
+```{r ex1}
+X=rnorm(100)
+
+m=dmm.BaseModel("UnivariateNormalModel", c(0.,1.,1.,1.))
+
+o=dmm.cluster(m,X)
+
+state=o[[1]]
+dmm.summarize(state$clusters)
+
+
+Xdata=rbind(matrix(rnorm(100),ncol=2),1+matrix(rnorm(100),ncol=2)/2)
+m=dmm.BaseModel("MultivariateNormalModel", data=Xdata)
+
+o=dmm.cluster(m,Xdata,iters=1000)
+
+state=o[[1]]
+dmm.summarize(state$clusters)
+
+```
+
+## Example 2: Using JModel
+An example of creating a JModel object: a model defined using user given Julia functions.
+
+```{r ex2}
+X=rnorm(100)
+dmm.addfile("examples/example2.jl")
+
+m1=dmm.JConjugateModel("example_pdf", "example_pri", "example_marg", list(0.0,1.0,2.0,0.5))
+o=dmm.cluster(m1,X)
+dmm.summarize(o[[1]]$clusters)
+
+m2=dmm.JNonConjugateModel("example_pdf", "example_pri", list(0.0,1.0,2.0,0.5))
+o=dmm.cluster(m2,X)
+dmm.summarize(o[[1]]$clusters)
+```
+

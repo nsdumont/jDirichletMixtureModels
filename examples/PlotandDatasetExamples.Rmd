@@ -61,7 +61,7 @@ data(syntheticGaussian2, package = "jDirichletMixtureModels")
 model <- dmm.BaseModel(data=syntheticGaussian2)
 
 # Run cluster code
-states2 <- dmm.cluster(model, syntheticGaussian2, alpha = 10.0, iters = 1500, burnin = 1000, shuffled = TRUE)
+states2 <- dmm.cluster(model, syntheticGaussian2, alpha = 10000.0, iters = 1500, burnin = 1000, shuffled = TRUE)
 
 # Display result of a single state
 astate <- states2[[1]]
@@ -152,4 +152,39 @@ tikz(file = "mouse.tex", width = 2.5, height = 2.5)
 dmm.plot(astate$data)
 dev.off()
 ```
+
+
+## Number of Clusters vs Iterations
+```{r}
+
+data(syntheticGaussian2, package = "jDirichletMixtureModels")
+
+# Make the model
+model <- dmm.BaseModel(data=syntheticGaussian2)
+
+# Run cluster code
+its <- 500
+states <- dmm.cluster(model, syntheticGaussian2, alpha = 10.0, iters = its, burnin = 0, shuffled = FALSE)
+
+# Display result of a single state
+astate <- states[[1]]
+dmm.summarize(astate$clusters)
+
+clusterIt <- data.frame()
+for (i in 1:its){
+  clusterIt <- rbind(clusterIt, data.frame("Iterations" = i, "NumberofClusters" = length(states[[i]]$clusters)) )
+}
+
+tikz(file = "ClusterIts.tex", width = 3, height = 2)
+chart <- ggplot( clusterIt[1:30,], aes(x=Iterations, y=NumberofClusters ) ) +
+        geom_line(color="turquoise")+
+        geom_point(color="turquoise4")+
+        xlab("Iterations") +
+        ylab("Number of Clusters") +
+       scale_color_brewer(palette="Dark2")
+chart
+dev.off()
+
+```
+
 

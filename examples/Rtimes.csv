@@ -1,4 +1,4 @@
-"","N","pre.computation.time","computation.time","post.computation.time"
+“Ind”,”N”,”precomputationtime","computationtime","postcomputationtime"
 "elapsed",50,0.00499999999988177,0.783000000000129,15.1139999999998
 "elapsed1",100,0.00399999999990541,1.27299999999991,15.566
 "elapsed2",200,0.00400000000013279,3.35199999999986,15.491

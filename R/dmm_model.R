@@ -2,6 +2,7 @@
 
 #' Create a model using R fucntions
 #'
+#' *NOTE: This function is not avaible in the current version of jDirichletMixtureModels.*
 #'  Create an model object to be used in the \code{dmm.cluster} function, using user given R functions.
 #'
 #'  @usage \code{model <- dmm.Rmodel(pdf_fct, sample_fct, marg_fct, params, isconjugate=TRUE)}
@@ -14,8 +15,10 @@
 #'
 #' @return A model object of type RModel which can be passed to \code{dmm.cluster}.
 #'
-#' @export
+#' #@export
 dmm.RModel <- function(pdf_func, sample_func=NULL, marg_func=NULL, params, isconjugate=TRUE){
+  stop("This function is not avaible in the current version of jDirichletMixtureModels")
+  
   if (isconjugate & (is.null(marg_fct) | is.null(sample_func)) ){
     stop("Error: A marg_fct and sample_func are requried for conjugate models.")
   }

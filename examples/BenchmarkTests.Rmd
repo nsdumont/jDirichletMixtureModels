@@ -1,0 +1,74 @@
+---
+title: "Benchmarks"
+author: "Nicole Dumont"
+date: '2018-04-21'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tictoc)
+library(jDirichletMixtureModels)
+dmm.setup()
+```
+
+
+## Time for Number of Data points
+
+Getting computation times for this package for different numbers of data points.
+
+```{r numTimes}
+model <- dmm.BaseModel("UnivariateNormalModel")
+
+nums <- c(50,100,200,400)
+times <- data.frame()
+for (i in 1:length(nums)) {
+  data <- rnorm(nums[i])
+  t <- dmm.benchmark(model, data)
+  times <- rbind(times, data.frame("N"=nums[i],t))
+}
+
+times
+```
+
+## Comparing Packages
+
+Getting computation times for this package and two other R packages: dpmixsim and dirichletprocess. These must be installed to run this.
+
+```{r}
+library(tictoc)
+library(dpmixsim)
+library(dirichletprocess)
+
+
+nums <- c(50,100,200,400)
+times <- data.frame()
+for (i in 1:length(nums)) {
+  data <- rnorm(nums[i])
+  
+  model <- dmm.BaseModel("UnivariateNormalModel", data = data)
+  jDMMTime <- dmm.benchmark(model, data, iters = 100, burnin=0)
+  
+  tic()
+  dpmixsim(data, M=1.0, a=1.0,  b=1.0, upalpha = FALSE, maxiter = 100)
+  dpmixTime <- toc()
+  dpmixTime <- dpmixTime$toc-dpmixTime$tic
+  
+  dpObj <- DirichletProcessGaussian(data, g0Priors = c(0, 1, 1, 1), alphaPriors = c(2, 4))
+  tic()
+  Fit(dpObj, its=100, updatePrior = FALSE, progressBar = FALSE)
+  dpTime <- toc()
+  dpTime <- dpTime$toc-dpTime$tic
+  
+  times <- rbind(times, data.frame("N"=nums[i],jDMMTime, 
+                                   "dpmixsim"= dpmixTime, "DirichletProcess"=dpTime))
+}
+
+times
+
+```
+
+
