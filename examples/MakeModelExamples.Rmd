@@ -47,14 +47,14 @@ An example of creating a JModel object: a model defined using user given Julia f
 
 ```{r ex2}
 X=rnorm(100)
-dmm.addfile("examples/example2.jl")
+dmm.addfile("example2.jl")
 
-m1=dmm.JConjugateModel("example_pdf", "example_pri", "example_marg", list(0.0,1.0,2.0,0.5))
-o=dmm.cluster(m1,X)
+m1=dmm.JConjugateModel("example_pdf", "example_post", "example_marg", list(0.0,1.0,2.0,0.5))
+o=dmm.cluster(m1,X,iters=500)
 dmm.summarize(o[[1]]$clusters)
 
 m2=dmm.JNonConjugateModel("example_pdf", "example_pri", list(0.0,1.0,2.0,0.5))
-o=dmm.cluster(m2,X)
+o=dmm.cluster(m2,X,iters=500)
 dmm.summarize(o[[1]]$clusters)
 ```
 
