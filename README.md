@@ -30,6 +30,9 @@ To use a predefined model you must pass it's name and any requried parameters.
 ```{r, eval=FALSE}
 model <- dmm.model("UnivariateNormal")     # Using the default parameters
 model <- dmm.model("MultivariateNormal", params=c(mu,kappa,T,nu))     # Using user defined parameters: they are the paramters for the Normal Wishart distribution
+
+# For more info:
+?dmm.BaseModel
 ```
 
 The rest of this section refers to package feautures in active development and not fully tested.
@@ -42,12 +45,19 @@ User defined models (both conjugate and non-conjugate) can also be used. Users m
 If these functions are R functions, models are defined as follows:
  ```{r, eval=FALSE}
 model <- dmm.model(pdf_func, sample_func, marg_func, params, isconjugate)
+
+# For more info:
+?dmm.RModel
 ```
 where `params` is a list of all hyperparameters. The functions `pdf_func`, `sample_func`, and  `marg_func` must all take these parameters. The option `isconjugate` is either TRUE or FALSE.
  
 Users can also define these functions as Julia functions with names `pdf_name`, `sample_name`, `marg_name` stored in file `filename`: 
 ```{r, eval=FALSE}
-model <- dmm.model(filename, pdf_name, sample_name, marg_name, params, isconjugate)
+dmm.addfile(filename)
+model <- dmm.model(pdf_name, sample_name, marg_name, params, isconjugate)
+
+# For more info:
+?dmm.JModel
 ```
 All of these inputs must be strings
 
@@ -60,27 +70,29 @@ Suppose you have a dataset of 2D N-by-2 data you wish to find clusters over, wit
   library(jDirichletMixtureModels)
   dmm.setup()
 
-  model <- dmm.model()
+  model <- dmm.model(data = Xdata)
 
   states <- dmm.cluster(model, Xdata)
 ```
 
-This will define a conjugate multivariate Normal model (multivariate Normal likelihood with Normal-Wishart prior) over your data, with default hyper-parameters. It will then perform a run of the clustering algorithm over the data, returning a list of cluster states.
+This will define a conjugate multivariate Normal model (multivariate Normal likelihood with Normal-Wishart prior) over your data, with hyper-parameters inferred from the data. It will then perform a run of the MCMC clustering algorithm over the data, returning a list of cluster states.
 This is a list of (effectively) I.I.D draws from the posterior over the clusters (default 5000 iterations with a burnin of 200).
 
-A cluster state, `states[[i]]`, consists of labeled data, `states[[i]]$labeledData`, and cluster information, `states[[i]]$clusterInfo`.
+A cluster state, `states[[i]]`, consists of labeled data, `states[[i]]$data`, and cluster information, `states[[i]]$clusters`.
 
 Suppose I wanted to take a random draw and see a summary of the clusters for that draw. I would then run the following:
 ```
-  dmm.summarize(states[[1]]$clusterInfo)
+  dmm.summarize(states[[1]]$clusters)
 ```
 This will print a summary of the clusters in the first state in the list. Note that by default the states are randomized so that they may be used as IID draws.
 To see a plot of the data colored by cluster I would run:
 ```
-  dmm.plot(states[[1]]$labeledData)
+  dmm.plot(states[[1]]$data)
 ```
 
 ## Bulit-In Models
+A complete guide to the bulit-in models avaible, their inputs, and their default inputs is currently being created. The current version is avaible in the resources/Models.pdf in this repository.
+
 The avaible bulit-in models are:
 - "MultivariateNormal" (default): A multivariate Normal likelihood with Normal-Wishart prior. Requries paramters: prior mean, \lambda, scale matrix, \nu (see https://en.wikipedia.org/wiki/Normal-Wishart_distribution)
 
